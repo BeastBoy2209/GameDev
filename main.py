@@ -23,8 +23,8 @@ WHITE = (255, 255, 255)
 
 
 # Создание объектов
-####player = Player("data/images/player.png", 100, 100)
-####level = Level("data/levels/level1.json")  # Пример загрузки уровня
+# player = Player("data/images/player.png", 100, 100)
+# level = Level("data/levels/level1.json")  # Пример загрузки уровня
 menu = Menu()
 menu.main_menu = menu
 
