@@ -24,11 +24,11 @@ class Button:
 
 class Menu:
     def __init__(self):
-        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu.PNG")  # Путь к игре(меняйте на свой)
+        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\main menu.PNG")  # Путь к меню(меняйте на свой)
         self.buttons = [
-            Button("START", 350, 250, 100, 50, (150, 150, 150), (255, 255, 255)),
-            Button("OPTIONS", 350, 320, 100, 50, (150, 150, 150), (255, 255, 255)),
-            Button("QUIT", 350, 390, 100, 50, (150, 150, 150), (255, 255, 255))
+            Button("START", 1345, 395, 248, 113, (150, 150, 150), (255, 255, 255)),
+            Button("OPTIONS", 1302, 556, 338, 107, (150, 150, 150), (255, 255, 255)),
+            Button("QUIT", 1354, 735, 236, 113, (150, 150, 150), (255, 255, 255))
         ]
         self.settings_menu = SettingsMenu() 
         self.current_menu = self  
@@ -53,7 +53,7 @@ class Menu:
 
 class SettingsMenu(Menu): 
     def __init__(self):
-        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\Setings Menu.PNG")
+        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\setings menu.PNG")
         self.buttons = [
             Button("BACK", 350, 500, 100, 50, (150, 150, 150), (255, 255, 255))
         ]
