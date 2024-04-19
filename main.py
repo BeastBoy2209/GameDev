@@ -27,6 +27,7 @@ WHITE = (255, 255, 255)
 # level = Level("data/levels/level1.json")  # Пример загрузки уровня
 menu = Menu()
 menu.main_menu = menu
+menu.settings_menu.main_menu = menu
 
 # Состояния игры
 GAME_STATES = {
