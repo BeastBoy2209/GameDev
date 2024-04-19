@@ -55,13 +55,13 @@ while True:
                 sys.exit()
 
         # Обновление состояния игры
-        player.update()
-        level.update()
+        # player.update()
+        # level.update()
 
         # Отрисовка игры
         screen.fill(BLACK)
-        level.draw(screen)
-        player.draw(screen)
+        # level.draw(screen)
+        # player.draw(screen)
 
     # Обновление экрана
     pygame.display.flip()
