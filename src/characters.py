@@ -27,28 +27,36 @@ class QuestGiver(Character):
         pass  # Здесь будет код выдачи квеста игроку
 
 
-class Player(Character):
-    def __init__(self, image_path, x, y):
-        super().__init__(image_path, x, y)
-        self.speed = 5  # Скорость передвижения
-        self.direction = "right"  # Направление движения
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y, level):
+        super().__init__()
+        self.image = pygame.Surface((30, 30))  # Просто квадрат для представления игрока
+        self.image.fill((0, 0, 255))  # Синий цвет игрока
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.level = level  # Ссылка на уровень, чтобы проверять столкновения со стенами
 
     def update(self):
-        # Обработка ввода пользователя и обновление позиции
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.rect.x -= self.speed
-            self.direction = "left"
+            self.rect.x -= 5
         if keys[pygame.K_RIGHT]:
-            self.rect.x += self.speed
-            self.direction = "right"
-        
+            self.rect.x += 5
         if keys[pygame.K_UP]:
-            self.rect.y -= self.speed  # Движение вверх
+            self.rect.y -= 5
         if keys[pygame.K_DOWN]:
-            self.rect.y += self.speed  # Движение вниз
+            self.rect.y += 5
 
-    # Остальной код класса
+        # Проверка столкновений со стенами
+        wall_collisions = pygame.sprite.spritecollide(self, self.level.walls, False)
+        for wall in wall_collisions:
+            if keys[pygame.K_LEFT]:
+                self.rect.x += 5  # Отменяем движение влево
+            if keys[pygame.K_RIGHT]:
+                self.rect.x -= 5  # Отменяем движение вправо
+            if keys[pygame.K_UP]:
+                self.rect.y += 5  # Отменяем движение вверх
+            if keys[pygame.K_DOWN]:
+                self.rect.y -= 5  # Отменяем движение вниз
 
 
     def draw(self, screen):
