@@ -17,19 +17,11 @@ class Button:
 
 class Menu:
     def __init__(self):
-<<<<<<< HEAD
         self.background_image = pygame.image.load(r"data/menu/main menu.PNG")
         self.buttons = [
             Button(r"data/menu/start_button.png", 1344, 394),
             Button(r"data/menu/options_button.png", 1300, 554),
             Button(r"data/menu/quit_button.png", 1352, 713)
-=======
-        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\main menu.PNG")
-        self.buttons = [
-            Button(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\start_button.png", 1344, 394),
-            Button(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\options_button.png", 1300, 554),
-            Button(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\quit_button.png", 1352, 713)
->>>>>>> origin/test
         ]
         self.settings_menu = SettingsMenu(self)
         self.current_menu = self
@@ -44,11 +36,7 @@ class Menu:
             for i, button in enumerate(self.buttons):
                 if button.is_clicked(event):
                     if i == 0:
-<<<<<<< HEAD
                         #логика игры
-=======
-                        # Start the game (implement your game logic here)
->>>>>>> origin/test
                         pass
                     elif i == 1:
                         self.current_menu = self.settings_menu
@@ -58,15 +46,9 @@ class Menu:
 
 class SettingsMenu(Menu):
     def __init__(self, main_menu):
-<<<<<<< HEAD
         self.background_image = pygame.image.load(r"data/menu/setings menu.PNG")
         self.buttons = [
             Button(r"data/menu/back_button.png", 1352, 713)
-=======
-        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\setings menu.PNG")
-        self.buttons = [
-            Button(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\back_button.png", 1352, 713)
->>>>>>> origin/test
         ]
         self.sliders = [
             Slider(1080, 453, 300, 20, 0, 1, 0.5, "Music Volume"),
@@ -99,13 +81,8 @@ class Slider:
         self.font = pygame.font.Font(None, 36) 
         self.slider_rect = pygame.Rect(x, y, int(width * (self.value / self.max_value)), height)
         
-<<<<<<< HEAD
         self.background_image = pygame.image.load(r"data/menu/slider_background.png")
         self.knob_image = pygame.image.load(r"data/menu/slider_knob.png")
-=======
-        self.background_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\slider_background.png")
-        self.knob_image = pygame.image.load(r"C:\Users\timur\Desktop\GitHUB\GameDev\data\menu\slider_knob.png")
->>>>>>> origin/test
         
         self.knob_rect = self.knob_image.get_rect(center=(self.slider_rect.centerx, self.slider_rect.centery))
         
