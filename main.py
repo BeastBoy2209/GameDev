@@ -46,9 +46,20 @@ while True:
                 pygame.quit()
                 sys.exit()
 
+<<<<<<< HEAD
         # Обновление игровой логики и отрисовка игровых объектов
         screen.fill(BLACK)  # Заливка экрана черным цветом (можно изменить цвет)
         # Ваша игровая логика и код отрисовки здесь...
+=======
+        # Обновление состояния игры
+        player.update()
+        level.update()
+
+        # Отрисовка игры
+        screen.fill(BLACK)
+        level.draw(screen)
+        player.draw(screen)
+>>>>>>> origin/test
 
     # Обновление экрана
     pygame.display.flip()
