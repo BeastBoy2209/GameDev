@@ -17,52 +17,54 @@ pygame.display.set_caption("Last Chance")
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
+# Создание экземпляра уровня
+level = Level()
+level.add_wall(100, 100, 50, 200)  # Пример стены (x, y, ширина, высота)
+level.add_wall(300, 300, 200, 50)  # Пример стены (x, y, ширина, высота)
+
+# Создание экземпляра игрока
+player = Player("Kelg.png", 10, )
+
 # Создание экземпляра меню
 menu = Menu()
 menu.main_menu = menu
 menu.settings_menu.main_menu = menu
+menu.current_menu = menu
 
 # Состояния игры
 GAME_STATES = {
     "MENU": 0,
     "GAME": 1
 }
-current_state = GAME_STATES["MENU"]  # Начало с состояния меню
+current_state = GAME_STATES["MENU"]
 
 # Игровой цикл
 clock = pygame.time.Clock()
 while True:
     events = pygame.event.get()
 
-    # Обработка событий в зависимости от текущего состояния игры
     if current_state == GAME_STATES["MENU"]:
-        menu.current_menu.update(events)  # Обновление текущего меню
-        menu.current_menu.draw(screen)  # Отрисовка текущего меню на экране
+        menu.current_menu.update(events)
+        menu.current_menu.draw(screen)
 
     elif current_state == GAME_STATES["GAME"]:
-        # Обработка игровых событий
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        # Обновление игровой логики и отрисовка игровых объектов
-        screen.fill(BLACK)  # Заливка экрана черным цветом (можно изменить цвет)
-        # Ваша игровая логика и код отрисовки здесь...
+        # Обновление позиции игрока и проверка столкновений со стенами
+        player.update(events, level.walls)
 
-    # Обновление экрана
+        screen.fill(BLACK)
+        level.draw(screen)
+        player.draw(screen)
+
     pygame.display.flip()
-
-    # Ограничение FPS
     clock.tick(60)
 
-    # Проверка, была ли нажата кнопка "Play" в меню
     for event in events:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:
             for i, button in enumerate(menu.current_menu.buttons):
-                if button.is_clicked(event) and i == 0:  # Кнопка Play нажата
-                    # Отображение изображения play (IMG_2893.PNG)
-                    play_image = pygame.image.load(r"data/images/IMG_2893.PNG")
-                    screen.blit(play_image, (0, 0))  # Отображение в позиции (0, 0)
-                    pygame.display.flip()  # Обновление экрана для показа изображения
-                    pygame.time.delay(2000)  # Пауза на 2 секунды (2000 миллисекунд)
+                if button.is_clicked(event) and i == 0:  # Нажата кнопка Play
+                    current_state = GAME_STATES["GAME"]  # Переключение в режим игры
