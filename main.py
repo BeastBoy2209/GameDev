@@ -16,7 +16,12 @@ pygame.display.set_caption("Last Chance")
 # Цвета
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+font = pygame.font.Font(None, 36)  # Выберите шрифт и размер
 
+# Стартовый текст
+intro_text = ["text1", "texr2", "text3"]  # Список текстов для показа поочередно
+text_delay = 2  # Задержка между появлением текстов в секундах
+current_text_index = 0  # Индекс текущего текста для отображения
 # Создание экземпляра меню
 menu = Menu()
 menu.main_menu = menu
@@ -31,9 +36,11 @@ current_state = GAME_STATES["MENU"]  # Начало с состояния мен
 
 # Игровой цикл
 clock = pygame.time.Clock()
+show_intro = True  # Флаг для отображения стартового текста
 while True:
     events = pygame.event.get()
 
+    
     # Обработка событий в зависимости от текущего состояния игры
     if current_state == GAME_STATES["MENU"]:
         menu.current_menu.update(events)  # Обновление текущего меню
@@ -45,21 +52,17 @@ while True:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-<<<<<<< HEAD
         # Обновление игровой логики и отрисовка игровых объектов
         screen.fill(BLACK)  # Заливка экрана черным цветом (можно изменить цвет)
         # Ваша игровая логика и код отрисовки здесь...
-=======
         # Обновление состояния игры
-        player.update()
-        level.update()
+        # player.update()
+        # level.update()
 
         # Отрисовка игры
         screen.fill(BLACK)
-        level.draw(screen)
-        player.draw(screen)
->>>>>>> origin/test
+        # level.draw(screen)
+        # player.draw(screen)
 
     # Обновление экрана
     pygame.display.flip()
@@ -72,8 +75,5 @@ while True:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:
             for i, button in enumerate(menu.current_menu.buttons):
                 if button.is_clicked(event) and i == 0:  # Кнопка Play нажата
-                    # Отображение изображения play (IMG_2893.PNG)
-                    play_image = pygame.image.load(r"data/images/IMG_2893.PNG")
-                    screen.blit(play_image, (0, 0))  # Отображение в позиции (0, 0)
-                    pygame.display.flip()  # Обновление экрана для показа изображения
-                    pygame.time.delay(2000)  # Пауза на 2 секунды (2000 миллисекунд)
+                    current_state = GAME_STATES["GAME"]  # Изменение состояния игры на GAME
+                    show_intro = True  # Включаем отображение стартового текста
