@@ -1,19 +1,13 @@
 import pygame
-import sys 
+import sys
 
 class Button:
-    def __init__(self, text, x, y, width, height, color, text_color):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
-        self.text_color = text_color
-        self.text = text
-        self.font = pygame.font.Font(None, 32)  # Пикните шрифт нормальный
+    def __init__(self, image_path, x, y):
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect(topleft=(x, y))
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-        text_surface = self.font.render(self.text, True, self.text_color)
-        text_rect = text_surface.get_rect(center=self.rect.center)
-        screen.blit(text_surface, text_rect)
+        screen.blit(self.image, self.rect)
 
     def is_clicked(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -21,17 +15,16 @@ class Button:
                 return True
         return False
 
-
 class Menu:
     def __init__(self):
-        self.background_image = pygame.image.load('data/menu/main menu.PNG')  # Путь к меню(меняйте на свой)
+        self.background_image = pygame.image.load(r"data/menu/main menu.PNG")
         self.buttons = [
-            Button("START", 1345, 395, 248, 113, (150, 150, 150), (255, 255, 255)),
-            Button("OPTIONS", 1302, 556, 338, 107, (150, 150, 150), (255, 255, 255)),
-            Button("QUIT", 1354, 735, 236, 113, (150, 150, 150), (255, 255, 255))
+            Button(r"data/menu/start_button.png", 1344, 394),
+            Button(r"data/menu/options_button.png", 1300, 554),
+            Button(r"data/menu/quit_button.png", 1352, 713)
         ]
-        self.settings_menu = SettingsMenu() 
-        self.current_menu = self  
+        self.settings_menu = SettingsMenu(self)
+        self.current_menu = self
 
     def draw(self, screen):
         screen.blit(self.background_image, (0, 0))
@@ -40,27 +33,28 @@ class Menu:
 
     def update(self, events):
         for event in events:
-            for button in self.buttons:
+            for i, button in enumerate(self.buttons):
                 if button.is_clicked(event):
-                    if button.text == "START":
-                        # Запустить игру
-                        pass  # Здесь будет код запуска игры
-                    elif button.text == "OPTIONS":
+                    if i == 0:
+                        #логика игры
+                        pass
+                    elif i == 1:
                         self.current_menu = self.settings_menu
-                    elif button.text == "QUIT":
+                    elif i == 2:
                         pygame.quit()
                         sys.exit()
 
-class SettingsMenu(Menu): 
-    def __init__(self):
-        self.background_image = pygame.image.load(r"data/menu/main menu.PNG")
+class SettingsMenu(Menu):
+    def __init__(self, main_menu):
+        self.background_image = pygame.image.load(r"data/menu/setings menu.PNG")
         self.buttons = [
-            Button("BACK", 350, 500, 100, 50, (150, 150, 150), (255, 255, 255))
+            Button(r"data/menu/back_button.png", 1352, 713)
         ]
         self.sliders = [
-            Slider(200, 200, 300, 20, 0, 1, 0.5, "Music Volume"),
-            Slider(200, 250, 300, 20, 0, 1, 0.5, "Effects Volume")
+            Slider(1080, 453, 300, 20, 0, 1, 0.5, "Music Volume"),
+            Slider(1080, 553, 300, 20, 0, 1, 0.5, "Effects Volume")
         ]
+        self.main_menu = main_menu
 
     def draw(self, screen):
         screen.blit(self.background_image, (0, 0))
@@ -71,32 +65,52 @@ class SettingsMenu(Menu):
 
     def update(self, events):
         for event in events:
-            for button in self.buttons:
+            for i, button in enumerate(self.buttons):
                 if button.is_clicked(event):
-                    if button.text == "BACK":
-                        self.current_menu = self.main_menu  # Возвращаемся в главное меню
+                    if i == 0:
+                        self.main_menu.current_menu = self.main_menu
             for slider in self.sliders:
                 slider.update(event)
-
 class Slider:
     def __init__(self, x, y, width, height, min_value, max_value, initial_value, text):
-        self.rect = pygame.Rect(x, y, width, height)
+        self.rect = pygame.Rect(x, y, 698, 23)
         self.min_value = min_value
         self.max_value = max_value
         self.value = initial_value
         self.text = text
-        self.font = pygame.font.Font(None, 24)
+        self.font = pygame.font.Font(None, 36) 
         self.slider_rect = pygame.Rect(x, y, int(width * (self.value / self.max_value)), height)
+        
+        self.background_image = pygame.image.load(r"data/menu/slider_background.png")
+        self.knob_image = pygame.image.load(r"data/menu/slider_knob.png")
+        
+        self.knob_rect = self.knob_image.get_rect(center=(self.slider_rect.centerx, self.slider_rect.centery))
+        
+        self.dragging = False 
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (150, 150, 150), self.rect)
-        pygame.draw.rect(screen, (100, 100, 100), self.slider_rect)
+        screen.blit(self.background_image, self.rect)
+        screen.blit(self.knob_image, self.knob_rect)
+
         text_surface = self.font.render(self.text + f": {int(self.value * 100)}%", True, (255, 255, 255))
-        text_rect = text_surface.get_rect(midleft=(self.rect.x - 100, self.rect.centery))
+        text_rect = text_surface.get_rect(midbottom=(self.rect.centerx, self.rect.top - 10))
         screen.blit(text_surface, text_rect)
 
     def update(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
-                self.slider_rect.x = event.pos[0] - self.rect.x
-                self.value = (self.slider_rect.width / self.rect.width) * self.max_value
+                self.dragging = True
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.dragging = False
+
+        if self.dragging:
+            mouse_x = event.pos[0]
+            if mouse_x < self.rect.left:
+                mouse_x = self.rect.left
+            elif mouse_x > self.rect.right:
+                mouse_x = self.rect.right
+            relative_x = mouse_x - self.rect.left
+            self.slider_rect.width = relative_x
+            self.value = (self.slider_rect.width / self.rect.width) * self.max_value
+            self.knob_rect.centerx = mouse_x
