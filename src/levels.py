@@ -42,8 +42,10 @@ class Room:
     def draw(self, screen):
         if self.background_image:
             screen.blit(self.background_image, (0, 0))
+
+        # Draw red rectangles for doors
         for door in self.doors:
-            pygame.draw.rect(screen, (255, 0, 0), door.rect, 2)
+            pygame.draw.rect(screen, (255, 0, 0), door.rect, 2)  # Red color, 2 pixels thick
 
 
 class MainHall(Room):
