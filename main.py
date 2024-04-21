@@ -22,7 +22,7 @@ level.add_wall(100, 100, 50, 200)  # Пример стены (x, y, ширина
 level.add_wall(300, 300, 200, 50)  # Пример стены (x, y, ширина, высота)
 
 # Создание экземпляра игрока
-player = Player("Kelg.png", initial_pos_x, initial_pos_y)
+player = Player("Kelg.png", 10, )
 
 # Создание экземпляра меню
 menu = Menu()
