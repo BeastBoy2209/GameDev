@@ -82,6 +82,7 @@ class SettingsMenu(Menu):
                         self.main_menu.current_menu = self.main_menu
             for slider in self.sliders:
                 slider.update(event)
+
 class Slider:
     def __init__(self, x, y, width, height, min_value, max_value, initial_value, text):
         self.rect = pygame.Rect(x, y, 698, 23)
