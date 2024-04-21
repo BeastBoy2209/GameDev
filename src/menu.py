@@ -126,3 +126,4 @@ class Slider:
             self.slider_rect.width = relative_x
             self.value = (self.slider_rect.width / self.rect.width) * self.max_value
             self.knob_rect.centerx = mouse_x
+            pygame.mixer.music.set_volume(self.value)

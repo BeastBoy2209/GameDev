@@ -8,6 +8,26 @@ class Character:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
+class Enemy(Character):
+    def __init__(self, image_paths, x, y):  # Pass a list of image paths
+        self.images = [pygame.image.load(path) for path in image_paths]
+        self.image_index = 0
+        self.image = self.images[self.image_index]
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.animation_timer = 0
+
+    def update(self):
+        self.animation_timer += 1
+        if self.animation_timer >= 10:  # Adjust the frame rate as needed
+            self.animation_timer = 0
+            self.image_index = (self.image_index + 1) % len(self.images)
+            self.image = self.images[self.image_index]
+
+    def check_collision(self, player):
+        if self.rect.colliderect(player.rect):
+            print("Game Over!")  
+
+
 class Player(Character):
     def __init__(self, x, y, level):
         super().__init__('data/images/mc.png', x, y)
@@ -24,9 +44,15 @@ class Player(Character):
         if keys[pygame.K_s]:
             self.rect.y += 5
 
-    def check_character_interactions(self, events):  # Add events as a parameter
+    def check_character_interactions(self, events):  
         for character in self.level.current_room.characters:
-            character.check_for_interaction(self, events)  # Pass events to the method
+            if isinstance(character, QuestCharacter):  # Check if it's a QuestCharacter
+                character.check_for_interaction(self, events)
+        
+    def check_enemy_collisions(self):
+        for character in self.level.current_room.characters:
+            if isinstance(character, Enemy):  # Check if it's an Enemy
+                character.check_collision(self)
 
 class QuestCharacter(Character):
     def __init__(self, image_path, x, y, dialogue):

@@ -1,6 +1,6 @@
 import pygame
 import sys
-from src.characters import Player, Character, QuestCharacter
+from src.characters import Player, Character, QuestCharacter, Enemy
 from src.levels import Level, Wall, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
 from src.menu import Menu
 
@@ -103,6 +103,12 @@ player = Player(10, 10, level)
 player.rect.x = 442 
 player.rect.y = 449
 
+# Create Enemy Characters (provide a list of image paths)
+cleaner1 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 455, 439)
+cleaner2 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 1481, 220)
+right_corridor.characters.append(cleaner1)
+right_corridor.characters.append(cleaner2)
+
 # Create Quest Characters
 independence_hall_character = QuestCharacter(r"data\images\Kelg.PNG", 929, 455, "Welcome to Independence Hall!")
 left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Psst, hey kid... I've got a job for you.")
@@ -110,6 +116,11 @@ left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Pss
 # Add them to the respective rooms
 independence_hall.characters.append(independence_hall_character)
 left_corridor.characters.append(left_corridor_character)
+
+# Load music files
+menu_music = pygame.mixer.music.load("data/sounds/start_menu.mp3")
+menu_music_playing = False
+game_music_playing = False
 
 # Menu Setup
 menu = Menu()
@@ -129,18 +140,33 @@ while True:
     events = pygame.event.get()
 
     if current_state == GAME_STATES["MENU"]:
+        if not menu_music_playing:
+            menu_music_playing = True
+            pygame.mixer.music.play(-1)
         menu.current_menu.update(events)
         menu.current_menu.draw(screen)
+        music_volume_slider = menu.settings_menu.sliders[0]  
+        pygame.mixer.music.set_volume(music_volume_slider.value)
+
 
     elif current_state == GAME_STATES["GAME"]:
+        if not game_music_playing and menu_music_playing == True:
+            pygame.mixer.music.unload
+            game_music = pygame.mixer.music.load("data/sounds/bg_music.mp3")
+            pygame.mixer.music.play(-1)
+            game_music_playing = True
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+        for character in level.current_room.characters:
+            if isinstance(character, Enemy):
+                character.update()
 
         player.update()
         level.check_door_collisions(player)
         player.check_character_interactions(events)
+        player.check_enemy_collisions()
 
         screen.fill((0, 0, 0))  
         level.current_room.draw(screen)  
