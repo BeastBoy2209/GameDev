@@ -1,6 +1,6 @@
 import pygame
 import sys
-from src.characters import Player, Character, QuestCharacter, Enemy
+from src.characters import Player, Character, QuestCharacter, Enemy, Safe
 from src.levels import Level, Wall, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
 from src.menu import Menu
 
@@ -112,6 +112,13 @@ right_corridor.characters.append(cleaner2)
 # Create Quest Characters
 independence_hall_character = QuestCharacter(r"data\images\Kelg.PNG", 929, 455, "Welcome to Independence Hall!")
 left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Psst, hey kid... I've got a job for you.")
+
+# Create Safe object
+# safe = Safe(1691, 430)
+safe = Safe(501, 430)
+
+# Add it to the Right Corridor
+main_hall.characters.append(safe)
 
 # Add them to the respective rooms
 independence_hall.characters.append(independence_hall_character)
