@@ -29,53 +29,55 @@ level.add_room(independence_hall, 5)
 
 # Create and Add Doors
 # --- Doors for Main Hall ---
-door1 = Door(559, 45, 229, 23, 1)  # To Left Stairs 
+door1 = Door(559, 45, 229, 23, 1, 1)  # To Left Stairs 
 main_hall.doors.append(door1)
 
 
-door2 = Door(578, 919, 211, 22, 2)  # To Right Stairs 
+door2 = Door(578, 919, 211, 22, 2, 2)  # To Right Stairs 
 main_hall.doors.append(door2)
 
 
-door3 = Door(1357, 370, 19, 190, 5)  # To Independence Hall 
+door3 = Door(1357, 370, 19, 190, 5, 3)  # To Independence Hall 
 main_hall.doors.append(door3)
 
 
 # --- Doors for Left Stairs --- 
-door4 = Door(665, 818, 168, 21, 0)  # To Main Hall  
+door4 = Door(665, 818, 168, 21, 0, 4)  # To Main Hall  
 left_stairs.doors.append(door4)
 
 
-door5 = Door(1380, 190, 14, 363, 3)  # To Left Corridor 
+door5 = Door(1380, 190, 14, 363, 3, 5)  # To Left Corridor 
 left_stairs.doors.append(door5)
 
 
 # --- Doors for Right Stairs --- 
-door6 = Door(657, 185, 169, 13, 0)  # To Main Hall 
+door6 = Door(657, 185, 169, 13, 0, 6)  # To Main Hall 
 right_stairs.doors.append(door6)
 
 
-door7 = Door(1369, 466, 18, 363, 4)  # To Right Corridor 
+door7 = Door(1369, 466, 18, 363, 4, 7)  # To Right Corridor 
 right_stairs.doors.append(door7)
 
 
 # --- Doors for Left Corridor --- 
-door8 = Door(0, 341, 14, 275, 1)  # To Left Stairs 
+door8 = Door(0, 341, 14, 275, 1, 8)  # To Left Stairs 
 left_corridor.doors.append(door8)
 
 
 # --- Doors for Right Corridor --- 
-door9 = Door(0, 342, 14, 276, 2)  # To Right Stairs
+door9 = Door(0, 342, 14, 276, 2, 9)  # To Right Stairs
 right_corridor.doors.append(door9)
 
 
 # --- Doors for Independence Hall --- 
-door10 = Door(160, 366, 20, 250, 0)  # To Main Hall 
+door10 = Door(160, 366, 20, 250, 0, 10)  # To Main Hall 
 independence_hall.doors.append(door10) 
 
 
 # Create Player
 player = Player(10, 10, level) 
+player.rect.x = 442 
+player.rect.y = 449
 
 # Menu Setup
 menu = Menu()
