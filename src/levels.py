@@ -4,11 +4,9 @@ class Level:
     def __init__(self):
         self.rooms = [] 
         self.current_room_index = 0 
-        self.doors = [] 
 
     def switch_room(self, index):
         self.current_room_index = index
-        self.current_room.doors = []  # Directly access the doors list of the room object
         print("Переход в комнату:", self.current_room_index) 
 
     def add_room(self, room, index):  
@@ -22,12 +20,12 @@ class Level:
         return None 
 
     def add_door(self, door):
-        self.doors.append(door)
+        pass
 
     def check_door_collisions(self, player):
-        for door in self.doors:
+        for door in self.current_room.doors:
             if player.rect.colliderect(door.rect):
-                self.switch_room(door.target_room_index) 
+                self.switch_room(door.target_room_index)
 
 class Door:
     def __init__(self, x, y, width, height, target_room_index):
@@ -37,7 +35,7 @@ class Door:
 class Room:
     def __init__(self):
         self.background_image = None
-        self.doors = [] 
+        self.doors = []  # Список дверей для этой комнат
 
     def draw(self, screen):
         if self.background_image:
