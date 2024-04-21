@@ -67,6 +67,17 @@ level.add_door(door8)
 door9 = Door(x=800, y=250, width=50, height=100, target_room_index=2)  # To Right Stairs (adjust right end of corridor)
 right_corridor.doors.append(door9)
 level.add_door(door9)
+# Цвета
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# Создание экземпляра уровня
+level = Level()
+level.add_wall(100, 100, 50, 200)  # Пример стены (x, y, ширина, высота)
+level.add_wall(300, 300, 200, 50)  # Пример стены (x, y, ширина, высота)
+
+# Создание экземпляра игрока
+player = Player("Kelg.png", 10, )
 
 # --- Doors for Independence Hall --- 
 door10 = Door(x=400, y=10, width=50, height=100, target_room_index=0)  # To Main Hall (top center)
@@ -81,12 +92,14 @@ menu = Menu()
 menu.main_menu = menu
 menu.settings_menu.main_menu = menu
 menu.current_menu = menu
+menu.current_menu = menu
 
 GAME_STATES = {
     "MENU": 0,
     "GAME": 1
 }
 current_state = GAME_STATES["MENU"]  # Start in the menu state
+current_state = GAME_STATES["MENU"]
 
 # Game Loop
 clock = pygame.time.Clock()
@@ -94,6 +107,8 @@ while True:
     events = pygame.event.get()
 
     if current_state == GAME_STATES["MENU"]:
+        menu.current_menu.update(events)
+        menu.current_menu.draw(screen)
         menu.current_menu.update(events)
         menu.current_menu.draw(screen)
 
@@ -108,6 +123,11 @@ while True:
 
         screen.fill((0, 0, 0))
         level.current_room.draw(screen) 
+        # Обновление позиции игрока и проверка столкновений со стенами
+        player.update(events, level.walls)
+
+        screen.fill(BLACK)
+        level.draw(screen)
         player.draw(screen)
 
     pygame.display.flip()
@@ -117,5 +137,8 @@ while True:
     for event in events:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:
             for i, button in enumerate(menu.current_menu.buttons):
+                if button.is_clicked(event) and i == 0:  # Нажата кнопка Play
+                    current_state = GAME_STATES["GAME"]  # Переключение в режим игры
+
                 if button.is_clicked(event) and i == 0:  # Play button clicked (adjust index if needed)
                     current_state = GAME_STATES["GAME"]  # Switch to the game state
