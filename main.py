@@ -27,62 +27,52 @@ level.add_room(left_corridor, 3)
 level.add_room(right_corridor, 4) 
 level.add_room(independence_hall, 5)  
 
+# Create and Add Doors
 # --- Doors for Main Hall ---
-door1 = Door(x=100, y=200, width=50, height=100, target_room_index=1)  # To Left Stairs (adjust left side of the hall)
+door1 = Door(100, 200, 50, 100, 1)  # To Left Stairs 
 main_hall.doors.append(door1)
 level.add_door(door1)
 
-door2 = Door(x=700, y=200, width=50, height=100, target_room_index=2)  # To Right Stairs (adjust right side of the hall)
+door2 = Door(700, 200, 50, 100, 2)  # To Right Stairs 
 main_hall.doors.append(door2)
 level.add_door(door2)
 
-door3 = Door(x=400, y=500, width=50, height=100, target_room_index=5)  # To Independence Hall (adjust bottom center)
+door3 = Door(400, 500, 50, 100, 5)  # To Independence Hall 
 main_hall.doors.append(door3)
 level.add_door(door3)
 
 # --- Doors for Left Stairs --- 
-door4 = Door(x=10, y=10, width=50, height=100, target_room_index=0)  # To Main Hall (top of the stairs) 
+door4 = Door(10, 10, 50, 100, 0)  # To Main Hall  
 left_stairs.doors.append(door4)
 level.add_door(door4)
 
-door5 = Door(x=800, y=500, width=50, height=100, target_room_index=3)  # To Left Corridor (bottom of the stairs) 
+door5 = Door(800, 500, 50, 100, 3)  # To Left Corridor 
 left_stairs.doors.append(door5)
 level.add_door(door5)
 
 # --- Doors for Right Stairs --- 
-door6 = Door(x=10, y=10, width=50, height=100, target_room_index=0)  # To Main Hall (top of the stairs)
+door6 = Door(10, 10, 50, 100, 0)  # To Main Hall 
 right_stairs.doors.append(door6)
 level.add_door(door6)
 
-door7 = Door(x=10, y=500, width=50, height=100, target_room_index=4)  # To Right Corridor (bottom of the stairs)
+door7 = Door(10, 500, 50, 100, 4)  # To Right Corridor 
 right_stairs.doors.append(door7)
 level.add_door(door7)
 
 # --- Doors for Left Corridor --- 
-door8 = Door(x=10, y=250, width=50, height=100, target_room_index=1)  # To Left Stairs (adjust left end of corridor)
+door8 = Door(10, 250, 50, 100, 1)  # To Left Stairs 
 left_corridor.doors.append(door8)
 level.add_door(door8)
 
 # --- Doors for Right Corridor --- 
-door9 = Door(x=800, y=250, width=50, height=100, target_room_index=2)  # To Right Stairs (adjust right end of corridor)
+door9 = Door(800, 250, 50, 100, 2)  # To Right Stairs
 right_corridor.doors.append(door9)
 level.add_door(door9)
-# Цвета
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-
-# Создание экземпляра уровня
-level = Level()
-level.add_wall(100, 100, 50, 200)  # Пример стены (x, y, ширина, высота)
-level.add_wall(300, 300, 200, 50)  # Пример стены (x, y, ширина, высота)
-
-# Создание экземпляра игрока
-player = Player("Kelg.png", 10, )
 
 # --- Doors for Independence Hall --- 
-door10 = Door(x=400, y=10, width=50, height=100, target_room_index=0)  # To Main Hall (top center)
+door10 = Door(400, 10, 50, 100, 0)  # To Main Hall 
 independence_hall.doors.append(door10) 
-level.add_door(door10)
+level.add_door(door10) 
 
 # Create Player
 player = Player(10, 10, level) 
@@ -92,14 +82,12 @@ menu = Menu()
 menu.main_menu = menu
 menu.settings_menu.main_menu = menu
 menu.current_menu = menu
-menu.current_menu = menu
 
 GAME_STATES = {
     "MENU": 0,
     "GAME": 1
 }
-current_state = GAME_STATES["MENU"]  # Start in the menu state
-current_state = GAME_STATES["MENU"]
+current_state = GAME_STATES["MENU"] 
 
 # Game Loop
 clock = pygame.time.Clock()
@@ -109,8 +97,6 @@ while True:
     if current_state == GAME_STATES["MENU"]:
         menu.current_menu.update(events)
         menu.current_menu.draw(screen)
-        menu.current_menu.update(events)
-        menu.current_menu.draw(screen)
 
     elif current_state == GAME_STATES["GAME"]:
         for event in events:
@@ -118,27 +104,22 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-        player.update()  # Update player (handle movement, etc.)
+            # Handle Player Input 
+            # player.handle_input(events)  
+
+        player.update()  
         level.check_door_collisions(player) 
 
-        screen.fill((0, 0, 0))
+        screen.fill((0, 0, 0)) 
         level.current_room.draw(screen) 
-        # Обновление позиции игрока и проверка столкновений со стенами
-        player.update(events, level.walls)
-
-        screen.fill(BLACK)
-        level.draw(screen)
-        player.draw(screen)
+        player.draw(screen) 
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(60) 
 
-    # Check for Menu Interaction (in the menu state)
+    # Check for Menu Interaction
     for event in events:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:
             for i, button in enumerate(menu.current_menu.buttons):
-                if button.is_clicked(event) and i == 0:  # Нажата кнопка Play
-                    current_state = GAME_STATES["GAME"]  # Переключение в режим игры
-
-                if button.is_clicked(event) and i == 0:  # Play button clicked (adjust index if needed)
-                    current_state = GAME_STATES["GAME"]  # Switch to the game state
+                if button.is_clicked(event) and i == 0: 
+                    current_state = GAME_STATES["GAME"] 
