@@ -1,7 +1,7 @@
 import pygame
 import sys
-from src.characters import Player
-from src.levels import Level, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
+from src.characters import Player, Character, QuestCharacter
+from src.levels import Level, Wall, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
 from src.menu import Menu
 
 pygame.init()
@@ -9,6 +9,27 @@ pygame.init()
 WIDTH, HEIGHT = 1900, 1000
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Last Chance")
+
+player_speed = 5
+
+# Создание прямоугольников для стен
+wall_rect1 = pygame.Rect(351, 9, 208, 58)
+wall_rect2 = pygame.Rect(789, 9, 208, 58)
+wall_rect3 = pygame.Rect(942, 10, 58, 208)
+wall_rect4=pygame.Rect(1509, 256, 58, 208)
+
+# Создание объектов стен с передачей прямоугольников
+wall1 = Wall(wall_rect1)
+wall2 = Wall(wall_rect2)
+wall3= Wall(wall_rect3)
+wall4= Wall(wall_rect4)
+
+# Установка прозрачности стен
+wall_alpha = 100  # Прозрачность первой стены (значение альфа)
+wall1.image.set_alpha(wall_alpha)
+wall2.image.set_alpha(wall_alpha)
+wall3.image.set_alpha(wall_alpha)
+wall4.image.set_alpha(wall_alpha)
 
 # Create Level and Rooms
 level = Level()
@@ -19,6 +40,10 @@ left_corridor = LeftCorridor()
 right_corridor = RightCorridor()
 independence_hall = IndependenceHall()
 
+# Add Walls to Level
+level.add_wall(wall1)
+level.add_wall(wall2)
+
 # Add Rooms to Level (with indices)
 level.add_room(main_hall, 0)       
 level.add_room(left_stairs, 1)    
@@ -27,7 +52,6 @@ level.add_room(left_corridor, 3)
 level.add_room(right_corridor, 4) 
 level.add_room(independence_hall, 5)  
 
-# Create and Add Doors
 # --- Doors for Main Hall ---
 door1 = Door(559, 45, 229, 23, 1, 1)  # To Left Stairs 
 main_hall.doors.append(door1)
@@ -79,6 +103,14 @@ player = Player(10, 10, level)
 player.rect.x = 442 
 player.rect.y = 449
 
+# Create Quest Characters
+independence_hall_character = QuestCharacter(r"data\images\Kelg.PNG", 929, 455, "Welcome to Independence Hall!")
+left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Psst, hey kid... I've got a job for you.")
+
+# Add them to the respective rooms
+independence_hall.characters.append(independence_hall_character)
+left_corridor.characters.append(left_corridor_character)
+
 # Menu Setup
 menu = Menu()
 menu.main_menu = menu
@@ -106,14 +138,14 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-            # Handle Player Input 
-            # player.handle_input(events)  
-
-        player.update()  
-        level.check_door_collisions(player) 
+        player.update()
+        level.check_door_collisions(player)
+        player.check_character_interactions(events)
 
         screen.fill((0, 0, 0))  
         level.current_room.draw(screen)  
+        for wall in level.walls:
+            screen.blit(wall.image, wall.rect)
         player.draw(screen)
         
         pygame.display.flip()
