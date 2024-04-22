@@ -3,8 +3,7 @@ import sys
 from src.safe_game import game_constants
 from src.characters import Player, Character, QuestCharacter, Enemy, Safe
 import textwrap
-from src.characters import Player, Character, QuestCharacter, Enemy
-from src.levels import Level, Wall, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
+from src.levels import Level, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
 from src.menu import Menu
 from src.Usu import usu_animated_dialog
 from src.Usu2 import usu2_animated_dialog
@@ -18,6 +17,7 @@ pygame.init()
 WIDTH, HEIGHT = 1900, 1000
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Last Chance")
+
 
 
 player_speed = 5
@@ -102,7 +102,116 @@ dialog_state = {
     'ready_to_advance': False  
 }
 dialogue = 0
+talkk = 0
+talku = 0
+
 font = pygame.font.Font("data/dialogs/Grand9K Pixel.ttf", 36)
+
+#Characters
+class Character:
+    def __init__(self, image_path, x, y):
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+class Enemy(Character):
+    def __init__(self, image_paths, x, y):
+        self.images = [pygame.image.load(path) for path in image_paths]
+        self.image_index = 0
+        self.image = self.images[self.image_index]
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.animation_timer = 0
+
+    def update(self):
+        self.animation_timer += 1
+        if self.animation_timer >= 10:  
+            self.animation_timer = 0
+            self.image_index = (self.image_index + 1) % len(self.images)
+            self.image = self.images[self.image_index]
+
+    def check_collision(self, player):
+        if self.rect.colliderect(player.rect):
+            print("Game Over!")  
+
+class Player(Character):
+    def __init__(self, x, y, level):
+        super().__init__('data/images/mc.png', x, y)
+        self.level = level
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a]: 
+            self.rect.x -= 5
+        if keys[pygame.K_d]:
+            self.rect.x += 5
+        if keys[pygame.K_w]:
+            self.rect.y -= 5
+        if keys[pygame.K_s]:
+            self.rect.y += 5
+
+    def check_character_interactions(self, events):  
+        for character in self.level.current_room.characters:
+            if isinstance(character, kelCharacter):
+                character.check_for_interaction(self, events, 1)
+            if isinstance(character, usuCharacter):
+                character.check_for_interaction(self, events, 2)
+
+        
+    def check_enemy_collisions(self):
+        for character in self.level.current_room.characters:
+            if isinstance(character, Enemy):  # Check if it's an Enemy
+                character.check_collision(self)
+
+class kelCharacter(Character):
+    def __init__(self, image_path, x, y, index):
+        super().__init__(image_path, x, y)
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                            self.rect.width + 100, self.rect.height + 100)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print("1")
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 1:
+                    global talkk
+                    talkk = talkk + 1
+                    print("1")
+                    break
+
+class usuCharacter(Character):
+    def __init__(self, image_path, x, y, index):
+        super().__init__(image_path, x, y)
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                            self.rect.width + 100, self.rect.height + 100)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print(1)
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 2:
+                    global talku
+                    talku = talku + 1
+                    print("2")
+                    break
+
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 
 
 # Создание прямоугольников для стен
@@ -112,19 +221,19 @@ wall_rect3 = pygame.Rect(942, 10, 58, 208)
 wall_rect4 = pygame.Rect(1509, 256, 58, 208)
 
 # Создание объектов стен с передачей прямоугольников
-wall1 = Wall(wall_rect1)
-wall2 = Wall(wall_rect2)
-wall3= Wall(wall_rect3)
-wall4= Wall(wall_rect4)
+# wall1 = Wall(wall_rect1)
+# wall2 = Wall(wall_rect2)
+# wall3= Wall(wall_rect3)
+# wall4= Wall(wall_rect4)
 
 # Установка прозрачности стен
-wall_alpha = 100  # Прозрачность первой стены (значение альфа)
-wall1.image.set_alpha(wall_alpha)
-wall2.image.set_alpha(wall_alpha)
-wall3.image.set_alpha(wall_alpha)
-wall4.image.set_alpha(wall_alpha)
+# wall_alpha = 100  # Прозрачность первой стены (значение альфа)
+# wall1.image.set_alpha(wall_alpha)
+# wall2.image.set_alpha(wall_alpha)
+# wall3.image.set_alpha(wall_alpha)
+# wall4.image.set_alpha(wall_alpha)
 
-# Create Level and Rooms
+# Create level and rooms
 level = Level()
 main_hall = MainHall(screen)
 left_stairs = LeftStairs(screen)
@@ -134,10 +243,10 @@ right_corridor = RightCorridor(screen)
 independence_hall = IndependenceHall(screen )
 
 # Add Walls to Level
-level.add_wall(wall1)
-level.add_wall(wall2)
+# level.add_wall(wall1)
+# level.add_wall(wall2)
 
-# Add Rooms to Level (with indices)
+# Add rooms to the level
 level.add_room(main_hall, 0)       
 level.add_room(left_stairs, 1)    
 level.add_room(right_stairs, 2)   
@@ -145,66 +254,70 @@ level.add_room(left_corridor, 3)
 level.add_room(right_corridor, 4) 
 level.add_room(independence_hall, 5)  
 
-# --- Doors for Main Hall ---
-door1 = Door(559, 45, 229, 23, 1, 1)  # To Left Stairs 
+#Doors for main hall
+door1 = Door(559, 45, 229, 23, 1, 1)  #left stairs 
 main_hall.doors.append(door1)
 
 
-door2 = Door(578, 919, 211, 22, 2, 2)  # To Right Stairs 
+door2 = Door(578, 919, 211, 22, 2, 2)  #right stairs 
 main_hall.doors.append(door2)
 
 
-door3 = Door(1357, 370, 19, 190, 5, 3)  # To Independence Hall 
+door3 = Door(1357, 370, 19, 190, 5, 3)  #independence hall 
 main_hall.doors.append(door3)
 
 
-# --- Doors for Left Stairs --- 
-door4 = Door(665, 818, 168, 21, 0, 4)  # To Main Hall  
+#Doors for Left Stairs 
+door4 = Door(665, 818, 168, 21, 0, 4)  #main hall  
 left_stairs.doors.append(door4)
 
 
-door5 = Door(1380, 190, 14, 363, 3, 5)  # To Left Corridor 
+door5 = Door(1380, 190, 14, 363, 3, 5)  #left corridor 
 left_stairs.doors.append(door5)
 
 
-# --- Doors for Right Stairs --- 
-door6 = Door(657, 185, 169, 13, 0, 6)  # To Main Hall 
+#Doors for Right Stairs
+door6 = Door(657, 185, 169, 13, 0, 6)  #main hall 
 right_stairs.doors.append(door6)
 
 
-door7 = Door(1369, 466, 18, 363, 4, 7)  # To Right Corridor 
+door7 = Door(1369, 466, 18, 363, 4, 7)  #right corridor 
 right_stairs.doors.append(door7)
 
 
-# --- Doors for Left Corridor --- 
-door8 = Door(0, 341, 14, 275, 1, 8)  # To Left Stairs 
+#Doors for left corridor
+door8 = Door(0, 341, 14, 275, 1, 8)  #left stairs 
 left_corridor.doors.append(door8)
 
 
-# --- Doors for Right Corridor --- 
-door9 = Door(0, 342, 14, 276, 2, 9)  # To Right Stairs
+#Doors for right corridor
+door9 = Door(0, 342, 14, 276, 2, 9)  #right stairs
 right_corridor.doors.append(door9)
 
 
-# --- Doors for Independence Hall --- 
-door10 = Door(160, 366, 20, 250, 0, 10)  # To Main Hall 
+#Doors for Independence Hall
+door10 = Door(160, 366, 20, 250, 0, 10)  #main hall 
 independence_hall.doors.append(door10) 
 
 
-# Create Player
+# Create player
 player = Player(10, 10, level) 
 player.rect.x = 442 
 player.rect.y = 449
 
-# Create Enemy Characters (provide a list of image paths)
+# Create enemy characters
 cleaner1 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 455, 439)
 cleaner2 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 1481, 220)
 right_corridor.characters.append(cleaner1)
 right_corridor.characters.append(cleaner2)
 
-# Create Quest Characters
-independence_hall_character = QuestCharacter(r"data\images\Kelg.PNG", 929, 455, "Welcome to Independence Hall!")
-left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Psst, hey kid... I've got a job for you.")
+# Create quest characters
+independence_hall_character = kelCharacter(r"data\images\Kelg.PNG", 929, 455, 1)
+left_corridor_character = usuCharacter(r"data\images\Usu.PNG", 1287, 126, 2)
+
+
+# Just some variables for further use
+completequiz = 0
 
 # Create Safe object
 safe = Safe(1700, 400, game_constants)
@@ -219,7 +332,7 @@ menu_music = pygame.mixer.music.load("data/sounds/start_menu.mp3")
 menu_music_playing = False
 game_music_playing = False
 
-# Menu Setup
+# Menu setup
 menu = Menu()
 menu.main_menu = menu
 menu.settings_menu.main_menu = menu
@@ -238,9 +351,8 @@ GAME_STATES = {
 }
 current_state = GAME_STATES["MENU"]
 
-# quiz completion
+# Quiz completion
 def run_quiz(screen, font):
-    # Colors and settings
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
@@ -296,14 +408,14 @@ def run_quiz(screen, font):
         pygame.display.flip()
 
 def render_question(screen, font, question, choices, selected, text_color, background_color):
-    lines = textwrap.wrap(question, width=100)  # Adjust the width as needed
+    lines = textwrap.wrap(question, width=100)
     y = 50
     for line in lines:
         question_surface = font.render(line, True, text_color)
         screen.blit(question_surface, (50, y))
         y += font.get_height()
 
-    y += 20  # Add some spacing before choices
+    y += 20
     for index, choice in enumerate(choices):
         choice_surface = font.render(choice, True, text_color)
         screen.blit(choice_surface, (50, y))
@@ -327,10 +439,11 @@ def congratulations(screen, font, score, text_color, width, height):
     message_surface = font.render(message, True, text_color)
     screen.blit(message_surface, (width // 2 - message_surface.get_width() // 2, height // 2))
     pygame.display.flip()
-    pygame.time.wait(2000)  #
-    global current_state, congrats
+    pygame.time.wait(2000) 
+    global current_state, congrats, completequiz
     current_state = GAME_STATES["GAME"]
     congrats = False
+    completequiz = 1
 
 # Dialog state variables 
 dialog_state_morning = {'active': False, 'ready_to_advance': False, 'current_npc': npc_list1[0]}
@@ -340,7 +453,7 @@ dialog_state_kelgenbayev1 = {'active': False, 'current_npc': npc_list2[0]}
 dialog_state_final = {'active': False, 'current_npc': npc_list[0]}  
 
 
-# Game Loop
+# Game loop
 clock = pygame.time.Clock()
 while True:
     events = pygame.event.get()
@@ -372,25 +485,25 @@ while True:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_2 and dialogue == 1:
+                if event.key == pygame.K_e and dialogue == 1 and talku == 1:
                     current_state = GAME_STATES["DIALOG_USU1"]
                     dialog_state_usu1['active'] = True
                     dialog_state_usu1['current_phrase_index'] = 0
                     dialog_state_usu1['text_position'] = 0
                     dialogue = 2
-                elif event.key == pygame.K_3:
+                elif event.key == pygame.K_e and dialogue == 2 and talku >= 2:
                     current_state = GAME_STATES["DIALOG_USU2"]
                     dialog_state_usu2['active'] = True 
                     dialog_state_usu2['current_phrase_index'] = 0
                     dialog_state_usu2['text_position'] = 0
                     dialogue = 3
-                elif event.key == pygame.K_4 and dialogue == 0:
+                elif event.key == pygame.K_e and dialogue == 0 and talkk == 1:
                     current_state = GAME_STATES["DIALOG_KELGENBAYEV1"]
                     dialog_state_kelgenbayev1['active'] = True 
                     dialog_state_kelgenbayev1['current_phrase_index'] = 0
                     dialog_state_kelgenbayev1['text_position'] = 0
                     dialogue = 1 
-                elif event.key == pygame.K_5 and dialogue == 3:
+                elif event.key == pygame.K_e and dialogue == 3 and completequiz == 1 and talkk >= 2:
                     current_state = GAME_STATES["DIALOG_FINAL"]
                     dialog_state_final['active'] = True 
                     dialog_state_final['current_phrase_index'] = 0
