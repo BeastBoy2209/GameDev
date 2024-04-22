@@ -1,5 +1,6 @@
 import pygame
 import sys
+from src.safe_game import game_constants
 from src.characters import Player, Character, QuestCharacter, Enemy, Safe
 import textwrap
 from src.characters import Player, Character, QuestCharacter, Enemy
@@ -50,11 +51,7 @@ npc_list4 = [{
     }]
 npc_list1 = [{
         'rect': pygame.Rect(150, 100, 50, 50),
-        'dialog': ["**Vakes up", "*Opens eyes*", "*Yawn*", "Oh... Why is it so bright outside..?", 
-                   "Stop...", "*Realization*", "No, no, no... not again! I can't let this happen!",
-                   "WHERE IS MY PHONE?? WHAT TIME IS IT!!?", "*Time on the phone is 11:34.*", "OH MY GOD!!",
-                   "Now, I can only make it to the second lecture", "It is my 17th absence; I cannot skip anymore!!",
-                   "My last chance not to get F!!", "**Leaving ", "...",  "Time is 12:14 PM"],
+        'dialog': ["HEllo"],
         'background': 'data/dialogs/dormbackgroung.jpg',
         'image1': 'data/dialogs/MainCharacter.png', 
         'image2': 'data/dialogs/MCShock.PNG',
@@ -129,12 +126,12 @@ wall4.image.set_alpha(wall_alpha)
 
 # Create Level and Rooms
 level = Level()
-main_hall = MainHall()
-left_stairs = LeftStairs()
-right_stairs = RightStairs()
-left_corridor = LeftCorridor()
-right_corridor = RightCorridor()
-independence_hall = IndependenceHall()
+main_hall = MainHall(screen)
+left_stairs = LeftStairs(screen)
+right_stairs = RightStairs(screen)
+left_corridor = LeftCorridor(screen)
+right_corridor = RightCorridor(screen)
+independence_hall = IndependenceHall(screen )
 
 # Add Walls to Level
 level.add_wall(wall1)
@@ -210,11 +207,8 @@ independence_hall_character = QuestCharacter(r"data\images\Kelg.PNG", 929, 455, 
 left_corridor_character = QuestCharacter(r"data\images\Usu.PNG", 1287, 126, "Psst, hey kid... I've got a job for you.")
 
 # Create Safe object
-# safe = Safe(1691, 430)
-safe = Safe(501, 430)
-
-# Add it to the Right Corridor
-main_hall.characters.append(safe)
+safe = Safe(1700, 400, game_constants)
+right_corridor.characters.append(safe)
 
 # Add them to the respective rooms
 independence_hall.characters.append(independence_hall_character)
@@ -239,7 +233,8 @@ GAME_STATES = {
     "DIALOG_USU2": 4,    
     "DIALOG_KELGENBAYEV1": 5, 
     "DIALOG_FINAL": 6,
-    "QUIZ": 7     
+    "QUIZ": 7,
+    "SAFE_MINIGAME": 8
 }
 current_state = GAME_STATES["MENU"]
 
@@ -349,6 +344,7 @@ dialog_state_final = {'active': False, 'current_npc': npc_list[0]}
 clock = pygame.time.Clock()
 while True:
     events = pygame.event.get()
+
     if current_state == GAME_STATES["MENU"]:
         if not menu_music_playing:
             menu_music_playing = True
@@ -405,11 +401,11 @@ while True:
 
         player.update()
         level.check_door_collisions(player)
-        player.check_character_interactions(events)
+        player.check_character_interactions(events, game_constants)  # Check for Safe interaction
         player.check_enemy_collisions()
 
         screen.fill((0, 0, 0))  
-        level.current_room.draw(screen)  
+        level.current_room.draw()
         for wall in level.walls:
             screen.blit(wall.image, wall.rect)
         player.draw(screen)
@@ -428,7 +424,7 @@ while True:
     elif current_state == GAME_STATES["DIALOG_USU2"]:
         in_dialogue4 = usu2_animated_dialog(screen, npc_list4, font, events, dialog_state_usu2)
         if not in_dialogue4:
-            current_state = GAME_STATES["QUIZ"]  # Transition to quiz after dialogue
+            current_state = GAME_STATES["QUIZ"] 
             dialog_state_usu2['active'] = False
     elif current_state == GAME_STATES["DIALOG_KELGENBAYEV1"]:
         in_dialogue = kelgenbayev1_animated_dialog(screen, npc_list2, font, events, dialog_state_kelgenbayev1)
@@ -445,11 +441,11 @@ while True:
         run_quiz(screen, font)
         if congrats == False:
             current_state = GAME_STATES["GAME"]
-    
+    elif current_state == GAME_STATES["SAFE_MINIGAME"]: 
+        current_state = GAME_STATES["GAME"] # Return to main game
 
     pygame.display.flip()
     clock.tick(60) 
-
     # Check for Menu Interaction
     for event in events:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:

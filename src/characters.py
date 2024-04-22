@@ -1,5 +1,18 @@
 import pygame, sys, random
 from pygame.locals import *
+from .constants import GameConstants
+from .safe_game import main, terminate, checkForQuit, getStartingBoard, getBlankPosition, makeMove, isValidMove, getRandomMove, getLeftTopOfTile, getSpotClicked, drawTile, makeText, drawBoard, slideAnimation, generateNewPuzzle, resetAnimation  # Import from safe_game.py
+BLACK =         (  50,   50,   50)
+WHITE =         (255, 255, 255)
+BRIGHTBLUE =    (  0,  50, 255)
+GRAY =          (  122,  122,  122)
+BLUE =          (  112,  50, 255)
+PURPLE =         (  186, 85, 211)
+RED =           (255, 0, 0)
+UP = 'up'
+DOWN = 'down'
+LEFT = 'left'
+RIGHT = 'right'
 class Character:
     def __init__(self, image_path, x, y):
         self.image = pygame.image.load(image_path)
@@ -43,7 +56,7 @@ class Player(Character):
         if keys[pygame.K_s]:
             self.rect.y += 5
 
-    def check_character_interactions(self, events):  
+    def check_character_interactions(self, events, game_constants):  
         for character in self.level.current_room.characters:
             if isinstance(character, QuestCharacter):  # Check if it's a QuestCharacter
                 character.check_for_interaction(self, events)
@@ -77,34 +90,92 @@ class QuestCharacter(Character):
                     break
 
 class Safe(Character):
-    def __init__(self, x, y):
+    def __init__(self, x, y, game_constants):
         self.images = {
             "closed": pygame.image.load(r"data\images\safe_clossed.png"),
-            "open": pygame.image.load(r"data\images\safe_clossed.png"),
-            "empty": pygame.image.load(r"data\images\safe_clossed.png")
+            "open": pygame.image.load(r"data\images\safe_opened.png"),
+            "empty": pygame.image.load(r"data\images\safe_empty.png")
         }
-        self.state = "closed" 
+        self.state = "closed"
+        self.game_constants = game_constants
         self.image = self.images[self.state]
         self.rect = self.image.get_rect(topleft=(x, y))
         self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
                                             self.rect.width + 100, self.rect.height + 100)
+        
 
     def check_for_interaction(self, player, events):
         if self.interaction_zone.colliderect(player.rect):
             for event in events:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                    print("1")
+                    print("Interacting with Safe")
                     if self.state == "closed":
-                        player_won = run_safe_minigame()
-                        if player_won:  # Replace with the appropriate condition to check for a win
+                        player_won = self.run_safe_minigame(player.level.current_room.screen) 
+                        if player_won:
+                            print("Player won the minigame!")
                             self.state = "open"
                             self.image = self.images[self.state]
-                    elif self.state == "open":
+                    # Удалено лишнее условие
+                    elif self.state == "open":  # Изменено на elif
+                        print("now empty")
                         self.state = "empty"
                         self.image = self.images[self.state]
-                    break
+                        break
+
+    def run_safe_minigame(self, screen):
+        mainBoard, solutionSeq = generateNewPuzzle(80, screen, self.game_constants)
+        SOLVEDBOARD = getStartingBoard()
+        allMoves = []
+        TEXT = PURPLE
+        BGCOLOR = GRAY
+        SOLVE_SURF, SOLVE_RECT = makeText('Solve', TEXT, BGCOLOR, 
+                                            1900 - 120, 1000 - 250)
+
+        while True:
+            slideTo = None
+            msg = 'Click tile or press arrow keys to slide.'
+            if mainBoard == SOLVEDBOARD:
+                return True  # Player won!
+
+            drawBoard(mainBoard, msg, screen, self.game_constants)
+            checkForQuit()
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    terminate()
+                elif event.type == MOUSEBUTTONUP:
+                    spotx, spoty = getSpotClicked(mainBoard, event.pos[0], event.pos[1])
+                    if (spotx, spoty) == (None, None):
+                        if SOLVE_RECT.collidepoint(event.pos):
+                            resetAnimation(mainBoard, solutionSeq + allMoves, screen, self.game_constants)  # Передаем screen и self.game_constants
+                            allMoves = []
+                    else:
+                        blankx, blanky = getBlankPosition(mainBoard)
+                        if spotx == blankx + 1 and spoty == blanky:
+                            slideTo = GameConstants.LEFT
+                        elif spotx == blankx - 1 and spoty == blanky:
+                            slideTo = GameConstants.RIGHT
+                        elif spotx == blankx and spoty == blanky + 1:
+                            slideTo = GameConstants.UP
+                        elif spotx == blankx and spoty == blanky - 1:
+                            slideTo = GameConstants.DOWN
+
+                elif event.type == KEYUP:
+                    if event.key in (K_LEFT, K_a) and isValidMove(mainBoard, LEFT):
+                        slideTo = LEFT
+                    elif event.key in (K_RIGHT, K_d) and isValidMove(mainBoard, RIGHT):
+                        slideTo = RIGHT
+                    elif event.key in (K_UP, K_w) and isValidMove(mainBoard, UP):
+                        slideTo = UP
+                    elif event.key in (K_DOWN, K_s) and isValidMove(mainBoard, DOWN):
+                        slideTo = DOWN
+
+            if slideTo:
+                slideAnimation(mainBoard, slideTo, 'Click tile or press arrow keys to slide.', 8, screen, self.game_constants)  # Передаем screen и self.game_constants
+                makeMove(mainBoard, slideTo)
+                allMoves.append(slideTo) 
+            pygame.display.update()
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (0, 255, 0), self.interaction_zone, 2)
+        # pygame.draw.rect(screen, (0, 255, 0), self.interaction_zone, 2)
 

@@ -69,39 +69,40 @@ class Door:
         
 
 class Room:
-    def __init__(self):
+    def __init__(self, screen):
         self.background_image = None
-        self.doors = []  # Список дверей для этой комнат
+        self.doors = []
         self.characters = []
+        self.screen = screen
 
-    def draw(self, screen):
+    def draw(self):
         if self.background_image:
-            screen.blit(self.background_image, (0, 0))
+            self.screen.blit(self.background_image, (0, 0))  
         for character in self.characters:
-            character.draw(screen)
+            character.draw(self.screen)
 
 
 class MainHall(Room):
-    def __init__(self):
-        super().__init__()
-        self.background_image = pygame.image.load(r'data\rooms\mainHall.png').convert()  
+    def __init__(self, screen):
+        super().__init__(screen)  # Pass screen to the base class
+        self.background_image = pygame.image.load(r'data\rooms\mainHall.png').convert()
 class LeftStairs(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screen):
+        super().__init__(screen)
         self.background_image = pygame.image.load(r'data\rooms\left_stairs.png').convert()  
 class RightStairs(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screen):
+        super().__init__(screen)
         self.background_image = pygame.image.load(r'data\rooms\right_stairs.png').convert()  
 class LeftCorridor(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screen):
+        super().__init__(screen)
         self.background_image = pygame.image.load(r'data\rooms\left_corridor.png').convert()  
 class RightCorridor(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screen):
+        super().__init__(screen)
         self.background_image = pygame.image.load(r'data\rooms\right_corridor.png').convert()  
 class IndependenceHall(Room):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screen):
+        super().__init__(screen)
         self.background_image = pygame.image.load(r'data\rooms\independence.png').convert()
