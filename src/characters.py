@@ -18,7 +18,7 @@ class Enemy(Character):
 
     def update(self):
         self.animation_timer += 1
-        if self.animation_timer >= 10:  # Adjust the frame rate as needed
+        if self.animation_timer >= 10:  
             self.animation_timer = 0
             self.image_index = (self.image_index + 1) % len(self.images)
             self.image = self.images[self.image_index]
@@ -108,9 +108,3 @@ class Safe(Character):
         screen.blit(self.image, self.rect)
         pygame.draw.rect(screen, (0, 255, 0), self.interaction_zone, 2)
 
-def run_safe_minigame():
-
-    if mainBoard == SOLVEDBOARD:
-        return True  # Player won
-    else:
-        return False  # Player did not win
