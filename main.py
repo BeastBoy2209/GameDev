@@ -175,7 +175,7 @@ class kelCharacter(Character):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        # pygame.draw.rect(screen, (255, 0, 0), self.interaction_zone, 2)
+
 
     def interact(self):
         print("1")
@@ -197,7 +197,7 @@ class usuCharacter(Character):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        # pygame.draw.rect(screen, (255, 0, 0), self.interaction_zone, 2)
+
 
     def interact(self):
         print(1)
@@ -214,7 +214,7 @@ class usuCharacter(Character):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        # pygame.draw.rect(screen, (0, 255, 0), self.interaction_zone, 2)
+
 
 
 # Создание прямоугольников для стен
@@ -236,7 +236,7 @@ wall_rect4 = pygame.Rect(1509, 256, 58, 208)
 # wall3.image.set_alpha(wall_alpha)
 # wall4.image.set_alpha(wall_alpha)
 
-# Create Level and Rooms
+# Create level and rooms
 level = Level()
 main_hall = MainHall()
 left_stairs = LeftStairs()
@@ -249,7 +249,7 @@ independence_hall = IndependenceHall()
 # level.add_wall(wall1)
 # level.add_wall(wall2)
 
-# Add Rooms to Level (with indices)
+# Add rooms to the level
 level.add_room(main_hall, 0)       
 level.add_room(left_stairs, 1)    
 level.add_room(right_stairs, 2)   
@@ -257,77 +257,74 @@ level.add_room(left_corridor, 3)
 level.add_room(right_corridor, 4) 
 level.add_room(independence_hall, 5)  
 
-# --- Doors for Main Hall ---
-door1 = Door(559, 45, 229, 23, 1, 1)  # To Left Stairs 
+#Doors for main hall
+door1 = Door(559, 45, 229, 23, 1, 1)  #left stairs 
 main_hall.doors.append(door1)
 
 
-door2 = Door(578, 919, 211, 22, 2, 2)  # To Right Stairs 
+door2 = Door(578, 919, 211, 22, 2, 2)  #right stairs 
 main_hall.doors.append(door2)
 
 
-door3 = Door(1357, 370, 19, 190, 5, 3)  # To Independence Hall 
+door3 = Door(1357, 370, 19, 190, 5, 3)  #independence hall 
 main_hall.doors.append(door3)
 
 
-# --- Doors for Left Stairs --- 
-door4 = Door(665, 818, 168, 21, 0, 4)  # To Main Hall  
+#Doors for Left Stairs 
+door4 = Door(665, 818, 168, 21, 0, 4)  #main hall  
 left_stairs.doors.append(door4)
 
 
-door5 = Door(1380, 190, 14, 363, 3, 5)  # To Left Corridor 
+door5 = Door(1380, 190, 14, 363, 3, 5)  #left corridor 
 left_stairs.doors.append(door5)
 
 
-# --- Doors for Right Stairs --- 
-door6 = Door(657, 185, 169, 13, 0, 6)  # To Main Hall 
+#Doors for Right Stairs
+door6 = Door(657, 185, 169, 13, 0, 6)  #main hall 
 right_stairs.doors.append(door6)
 
 
-door7 = Door(1369, 466, 18, 363, 4, 7)  # To Right Corridor 
+door7 = Door(1369, 466, 18, 363, 4, 7)  #right corridor 
 right_stairs.doors.append(door7)
 
 
-# --- Doors for Left Corridor --- 
-door8 = Door(0, 341, 14, 275, 1, 8)  # To Left Stairs 
+#Doors for left corridor
+door8 = Door(0, 341, 14, 275, 1, 8)  #left stairs 
 left_corridor.doors.append(door8)
 
 
-# --- Doors for Right Corridor --- 
-door9 = Door(0, 342, 14, 276, 2, 9)  # To Right Stairs
+#Doors for right corridor
+door9 = Door(0, 342, 14, 276, 2, 9)  #right stairs
 right_corridor.doors.append(door9)
 
 
-# --- Doors for Independence Hall --- 
-door10 = Door(160, 366, 20, 250, 0, 10)  # To Main Hall 
+#Doors for Independence Hall
+door10 = Door(160, 366, 20, 250, 0, 10)  #main hall 
 independence_hall.doors.append(door10) 
 
 
-# Create Player
+# Create player
 player = Player(10, 10, level) 
 player.rect.x = 442 
 player.rect.y = 449
 
-# Create Enemy Characters (provide a list of image paths)
+# Create enemy characters
 cleaner1 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 455, 439)
 cleaner2 = Enemy(["data/images/cleaner1.PNG", "data/images/cleaner2.PNG", "data/images/cleaner3.PNG"], 1481, 220)
 right_corridor.characters.append(cleaner1)
 right_corridor.characters.append(cleaner2)
 
-# Create Quest Characters
+# Create quest characters
 independence_hall_character = kelCharacter(r"data\images\Kelg.PNG", 929, 455, 1)
 left_corridor_character = usuCharacter(r"data\images\Usu.PNG", 1287, 126, 2)
-# Create Safe object
-# safe = Safe(1691, 430)
-# safe = Safe(501, 430)
 
-# Add it to the Right Corridor
-# main_hall.characters.append(safe)
-first_dialogue = False
-second_dialogue = False
+
+# Just some variables for further use
 completequiz = 0
-# Add them to the respective rooms
 
+
+
+# Add them to the respective rooms
 independence_hall.characters.append(independence_hall_character)
 left_corridor.characters.append(left_corridor_character)
 
@@ -336,7 +333,7 @@ menu_music = pygame.mixer.music.load("data/sounds/start_menu.mp3")
 menu_music_playing = False
 game_music_playing = False
 
-# Menu Setup
+# Menu setup
 menu = Menu()
 menu.main_menu = menu
 menu.settings_menu.main_menu = menu
@@ -354,9 +351,8 @@ GAME_STATES = {
 }
 current_state = GAME_STATES["MENU"]
 
-# quiz completion
+# Quiz completion
 def run_quiz(screen, font):
-    # Colors and settings
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
@@ -412,14 +408,14 @@ def run_quiz(screen, font):
         pygame.display.flip()
 
 def render_question(screen, font, question, choices, selected, text_color, background_color):
-    lines = textwrap.wrap(question, width=100)  # Adjust the width as needed
+    lines = textwrap.wrap(question, width=100)
     y = 50
     for line in lines:
         question_surface = font.render(line, True, text_color)
         screen.blit(question_surface, (50, y))
         y += font.get_height()
 
-    y += 20  # Add some spacing before choices
+    y += 20
     for index, choice in enumerate(choices):
         choice_surface = font.render(choice, True, text_color)
         screen.blit(choice_surface, (50, y))
@@ -457,7 +453,7 @@ dialog_state_kelgenbayev1 = {'active': False, 'current_npc': npc_list2[0]}
 dialog_state_final = {'active': False, 'current_npc': npc_list[0]}  
 
 
-# Game Loop
+# Game loop
 clock = pygame.time.Clock()
 while True:
     events = pygame.event.get()
@@ -562,7 +558,7 @@ while True:
     pygame.display.flip()
     clock.tick(60) 
 
-    # Check for Menu Interaction
+    # Check for menu interaction
     for event in events:
         if current_state == GAME_STATES["MENU"] and event.type == pygame.MOUSEBUTTONDOWN:
             for i, button in enumerate(menu.current_menu.buttons):
