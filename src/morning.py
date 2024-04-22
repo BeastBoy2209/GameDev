@@ -16,19 +16,28 @@ def animated_dialog_morning(screen, npcs, font, events, dialog_state):
             ready_to_advance = True
 
     if dialog_active and current_npc:
-        background_image = pygame.image.load(current_npc['background'])
+        dialog_line = current_npc['dialog'][current_phrase_index]
+        if dialog_line in ["Time is 12:14 PM"]:
+            background_image = pygame.image.load(current_npc['image5'])
+        else:
+            background_image = pygame.image.load(current_npc['background'])
         screen.blit(background_image, (0, 0))
 
-        dialog_line = current_npc['dialog'][current_phrase_index]
         if dialog_line in ["*Yawn*"]:
             npc_image = pygame.image.load(current_npc['image1'])
         elif dialog_line in ["Oh... Why is it so bright outside..?", "Stop..."]:
             npc_image = pygame.image.load(current_npc['image3'])
         elif dialog_line in ["*Realization*", "No, no, no... not again! I can't let this happen!",
-                             "WHERE IS MY PHONE?? WHAT TIME IS IT!!?", "*Time on the phone is 11:34.*", "OH MY GOD!!",
+                             "WHERE IS MY PHONE?? WHAT TIME IS IT!!?", "*Time on the phone is 11:34 PM*", "OH MY GOD!!",
                              "Now, I can only make it to the second lecture", "It is my 17th absence; I cannot skip anymore!!",
                              "My last chance not to get F!!", "**Leaving "]:
             npc_image = pygame.image.load(current_npc['image2'])
+        elif dialog_line in ["..."]:
+            npc_image = pygame.image.load(current_npc['image4'])
+            background_image = pygame.image.load(current_npc['image4'])
+        elif dialog_line in ["Time is 12:14 PM"]:
+            background_image = pygame.image.load(current_npc['image5'])
+            npc_image = None
         else:
             npc_image = None
 
@@ -77,11 +86,13 @@ def main():
                    "Stop...", "*Realization*", "No, no, no... not again! I can't let this happen!",
                    "WHERE IS MY PHONE?? WHAT TIME IS IT!!?", "*Time on the phone is 11:34.*", "OH MY GOD!!",
                    "Now, I can only make it to the second lecture", "It is my 17th absence; I cannot skip anymore!!",
-                   "My last chance not to get F!!", "**Leaving "],
+                   "My last chance not to get F!!", "**Leaving ", "...",  "Time is 12:14 PM"],
         'background': 'data/dialogs/dormbackgroung.jpg',
         'image1': 'data/dialogs/MainCharacter.png', 
         'image2': 'data/dialogs/MCShock.PNG',
-        'image3': 'data/dialogs/MCdiscuse.PNG'
+        'image3': 'data/dialogs/MCdiscuse.PNG',
+        'image4': 'data/dialogs/black.jpg',
+        'image5': 'data/dialogs/kbtu.png'
     }]
     font = pygame.font.Font("data/dialogs/Grand9K Pixel.ttf", 36)
     dialog_state = {'active': False, 'ready_to_advance': False, 'current_npc': npc_list1[0]}
@@ -113,6 +124,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
