@@ -1,25 +1,29 @@
-BOARDWIDTH = 4  
-BOARDHEIGHT = 4 
+import pygame, sys, random
+from pygame.locals import *
+from .constants import GameConstants
+game_constants = GameConstants()
+# Create the constants (go ahead and experiment with different values)
+BOARDWIDTH = 4  # number of columns in the board
+BOARDHEIGHT = 4 # number of rows in the board
 TILESIZE = 80
 WINDOWWIDTH = 640
 WINDOWHEIGHT = 480
-FPS = 30
+FPS = 120
 BLANK = None
-
 #                 R    G    B
-BLACK =         (  0,   0,   0)
+BLACK =         (  50,   50,   50)
 WHITE =         (255, 255, 255)
 BRIGHTBLUE =    (  0,  50, 255)
-DARKTURQUOISE = (  3,  54,  73)
-BLUE =         (  0,  50, 255)
-GREEN =        (  0, 128,   0)
+GRAY =          (  122,  122,  122)
+BLUE =          (  112,  50, 255)
+PURPLE =         (  186, 85, 211)
 RED =           (255, 0, 0)
-BGCOLOR = DARKTURQUOISE
-TILECOLOR = BLUE
+BGCOLOR = GRAY
+TILECOLOR = BLACK
 TEXTCOLOR = WHITE
 BORDERCOLOR = RED
 BASICFONTSIZE = 20
-TEXT = GREEN
+TEXT = PURPLE
 
 BUTTONCOLOR = WHITE
 BUTTONTEXTCOLOR = BLACK
@@ -34,45 +38,36 @@ LEFT = 'left'
 RIGHT = 'right'
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, RESET_SURF, RESET_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT
-
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     pygame.display.set_caption('Slide Puzzle')
-    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
-    RESET_SURF, RESET_RECT = makeText('Reset',    TEXT, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 310)
-    NEW_SURF,   NEW_RECT   = makeText('New Game', TEXT, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 280)
-    SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXT, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 250)
+
+    # Remove NEW_SURF, NEW_RECT creation
+    SOLVE_SURF, SOLVE_RECT = makeText('Solve', TEXT, BGCOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 250)
 
     mainBoard, solutionSeq = generateNewPuzzle(80)
-    SOLVEDBOARD = getStartingBoard() 
-    allMoves = [] 
+    SOLVEDBOARD = getStartingBoard()
+    allMoves = []
+    WIN = False
 
-    while True: 
-        slideTo = None 
-        msg = 'Click tile or press arrow keys to slide.' 
+    while True:
+        slideTo = None
+        msg = 'Click tile or press arrow keys to slide.'
         if mainBoard == SOLVEDBOARD:
-            msg = 'Solved!'
-
-        drawBoard(mainBoard, msg)
-
+            msg = 'Unlocked!'
+            WIN = True
+        drawBoard(mainBoard, msg) 
         checkForQuit()
         for event in pygame.event.get(): 
             if event.type == MOUSEBUTTONUP:
                 spotx, spoty = getSpotClicked(mainBoard, event.pos[0], event.pos[1])
-
                 if (spotx, spoty) == (None, None):
-                    if RESET_RECT.collidepoint(event.pos):
-                        resetAnimation(mainBoard, allMoves) 
-                        allMoves = []
-                    elif NEW_RECT.collidepoint(event.pos):
-                        mainBoard, solutionSeq = generateNewPuzzle(80) 
-                        allMoves = []
-                    elif SOLVE_RECT.collidepoint(event.pos):
+                    if SOLVE_RECT.collidepoint(event.pos):
                         resetAnimation(mainBoard, solutionSeq + allMoves) 
                         allMoves = []
                 else:
+
                     blankx, blanky = getBlankPosition(mainBoard)
                     if spotx == blankx + 1 and spoty == blanky:
                         slideTo = LEFT
@@ -107,12 +102,12 @@ def terminate():
 
 
 def checkForQuit():
-    for event in pygame.event.get(QUIT): # get all the QUIT events
-        terminate() # terminate if any QUIT events are present
-    for event in pygame.event.get(KEYUP): # get all the KEYUP events
+    for event in pygame.event.get(QUIT): 
+        terminate() 
+    for event in pygame.event.get(KEYUP): 
         if event.key == K_ESCAPE:
-            terminate() # terminate if the KEYUP event was for the Esc key
-        pygame.event.post(event) # put the other KEYUP event objects back
+            terminate() 
+        pygame.event.post(event) 
 
 
 def getStartingBoard():
@@ -160,6 +155,7 @@ def isValidMove(board, move):
 
 def getRandomMove(board, lastMove=None):
     validMoves = [UP, DOWN, LEFT, RIGHT]
+
     if lastMove == UP or not isValidMove(board, DOWN):
         validMoves.remove(DOWN)
     if lastMove == DOWN or not isValidMove(board, UP):
@@ -168,6 +164,7 @@ def getRandomMove(board, lastMove=None):
         validMoves.remove(RIGHT)
     if lastMove == RIGHT or not isValidMove(board, LEFT):
         validMoves.remove(LEFT)
+
     return random.choice(validMoves)
 
 
@@ -187,44 +184,48 @@ def getSpotClicked(board, x, y):
     return (None, None)
 
 
-def drawTile(tilex, tiley, number, adjx=0, adjy=0):
+def drawTile(tilex, tiley, number, screen, game_constants, adjx=0, adjy=0):
     left, top = getLeftTopOfTile(tilex, tiley)
-    pygame.draw.rect(DISPLAYSURF, TILECOLOR, (left + adjx, top + adjy, TILESIZE, TILESIZE))
+    pygame.draw.rect(screen, TILECOLOR, (left + adjx, top + adjy, TILESIZE, TILESIZE))
+    BASICFONT = pygame.font.Font('data\dialogs\Grand9K Pixel.ttf', BASICFONTSIZE)
     textSurf = BASICFONT.render(str(number), True, TEXTCOLOR)
     textRect = textSurf.get_rect()
     textRect.center = left + int(TILESIZE / 2) + adjx, top + int(TILESIZE / 2) + adjy
-    DISPLAYSURF.blit(textSurf, textRect)
+    screen.blit(textSurf, textRect) 
 
 
 def makeText(text, color, bgcolor, top, left):
+    BASICFONT = pygame.font.Font('data\dialogs\Grand9K Pixel.ttf', BASICFONTSIZE) 
     textSurf = BASICFONT.render(text, True, color, bgcolor)
     textRect = textSurf.get_rect()
     textRect.topleft = (top, left)
     return (textSurf, textRect)
 
-
-def drawBoard(board, message):
-    DISPLAYSURF.fill(BGCOLOR)
+def drawBoard(board, message, screen, game_constants):
+    BGCOLOR = GRAY
+    screen.fill(BGCOLOR)
     if message:
         textSurf, textRect = makeText(message, MESSAGECOLOR, BGCOLOR, 5, 5)
-        DISPLAYSURF.blit(textSurf, textRect)
+        screen.blit(textSurf, textRect) 
 
     for tilex in range(len(board)):
         for tiley in range(len(board[0])):
             if board[tilex][tiley]:
-                drawTile(tilex, tiley, board[tilex][tiley])
+                drawTile(tilex, tiley, board[tilex][tiley], screen=screen, game_constants=game_constants)
 
     left, top = getLeftTopOfTile(0, 0)
     width = BOARDWIDTH * TILESIZE
     height = BOARDHEIGHT * TILESIZE
-    pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (left - 5, top - 5, width + 11, height + 11), 4)
+    pygame.draw.rect(screen, BORDERCOLOR, (left - 5, top - 5, width + 11, height + 11), 4) 
 
-    DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
-    DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
-    DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)
+    # Инициализация SOLVE_SURF и SOLVE_RECT
+    TEXT = PURPLE
+    BGCOLOR = GRAY
+    SOLVE_SURF, SOLVE_RECT = makeText('Solve', TEXT, BGCOLOR, 
+                                      1900 - 120, 1000 - 250)
+    screen.blit(SOLVE_SURF, SOLVE_RECT)
 
-
-def slideAnimation(board, direction, message, animationSpeed):
+def slideAnimation(board, direction, message, animationSpeed, screen, game_constants):
     blankx, blanky = getBlankPosition(board)
     if direction == UP:
         movex = blankx
@@ -238,46 +239,47 @@ def slideAnimation(board, direction, message, animationSpeed):
     elif direction == RIGHT:
         movex = blankx - 1
         movey = blanky
-    drawBoard(board, message)
-    baseSurf = DISPLAYSURF.copy()
+
+    drawBoard(board, message, screen, game_constants)
+    baseSurf = screen.copy() 
     moveLeft, moveTop = getLeftTopOfTile(movex, movey)
     pygame.draw.rect(baseSurf, BGCOLOR, (moveLeft, moveTop, TILESIZE, TILESIZE))
 
     for i in range(0, TILESIZE, animationSpeed):
         checkForQuit()
-        DISPLAYSURF.blit(baseSurf, (0, 0))
+        screen.blit(baseSurf, (0, 0)) 
         if direction == UP:
-            drawTile(movex, movey, board[movex][movey], 0, -i)
-        if direction == DOWN:
-            drawTile(movex, movey, board[movex][movey], 0, i)
-        if direction == LEFT:
-            drawTile(movex, movey, board[movex][movey], -i, 0)
-        if direction == RIGHT:
-            drawTile(movex, movey, board[movex][movey], i, 0)
+            drawTile(movex, movey, board[movex][movey], screen, game_constants, adjy=-i)  
+        elif direction == DOWN:
+            drawTile(movex, movey, board[movex][movey], screen, game_constants, adjy=i) 
+        elif direction == LEFT:
+            drawTile(movex, movey, board[movex][movey], screen, game_constants, adjx=-i) 
+        elif direction == RIGHT:
+            drawTile(movex, movey, board[movex][movey], screen, game_constants, adjx=i) 
 
         pygame.display.update()
-        FPSCLOCK.tick(FPS)
 
 
-def generateNewPuzzle(numSlides):
+def generateNewPuzzle(numSlides, screen, game_constants):
     sequence = []
     board = getStartingBoard()
-    drawBoard(board, '')
+    drawBoard(board, '', screen, game_constants)
     pygame.display.update()
     pygame.time.wait(500) 
     lastMove = None
     for i in range(numSlides):
         move = getRandomMove(board, lastMove)
-        slideAnimation(board, move, 'Generating new puzzle...', animationSpeed=int(TILESIZE / 3))
+        slideAnimation(board, move, 'Generating new code...', int(TILESIZE / 3), screen, game_constants)
         makeMove(board, move)
         sequence.append(move)
         lastMove = move
     return (board, sequence)
 
 
-def resetAnimation(board, allMoves):
+def resetAnimation(board, allMoves, screen, game_constants):
     revAllMoves = allMoves[:] 
     revAllMoves.reverse()
+
     for move in revAllMoves:
         if move == UP:
             oppositeMove = DOWN
@@ -287,7 +289,9 @@ def resetAnimation(board, allMoves):
             oppositeMove = LEFT
         elif move == LEFT:
             oppositeMove = RIGHT
-        slideAnimation(board, oppositeMove, '', animationSpeed=int(TILESIZE / 2))
+        slideAnimation(board, oppositeMove, '', int(TILESIZE / 2), screen, game_constants)
         makeMove(board, oppositeMove)
+
+
 if __name__ == '__main__':
     main()
