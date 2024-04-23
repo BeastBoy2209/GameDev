@@ -1,7 +1,9 @@
+from .shareddata import SharedData
 import pygame, sys, random
 from pygame.locals import *
 from .constants import GameConstants
-from .safe_game import main, terminate, checkForQuit, getStartingBoard, getBlankPosition, makeMove, isValidMove, getRandomMove, getLeftTopOfTile, getSpotClicked, drawTile, makeText, drawBoard, slideAnimation, generateNewPuzzle, resetAnimation  # Import from safe_game.py
+from .safe_game import main, terminate, checkForQuit, getStartingBoard, getBlankPosition, makeMove, isValidMove, getRandomMove, getLeftTopOfTile, getSpotClicked, drawTile, makeText, drawBoard, slideAnimation, generateNewPuzzle, resetAnimation  
+
 BLACK =         (  50,   50,   50)
 WHITE =         (255, 255, 255)
 BRIGHTBLUE =    (  0,  50, 255)
@@ -13,6 +15,7 @@ UP = 'up'
 DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
+
 class Character:
     def __init__(self, image_path, x, y):
         self.image = pygame.image.load(image_path)
@@ -41,13 +44,14 @@ class Enemy(Character):
             print("Game Over!")  
 
 class Player(Character):
-    def __init__(self, x, y, level):
+    def __init__(self, x, y, level, shared_data):
         super().__init__('data/images/mc.png', x, y)
         self.level = level
+        self.shared_data = shared_data
 
     def update(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]: 
+        if keys[pygame.K_a]:
             self.rect.x -= 5
         if keys[pygame.K_d]:
             self.rect.x += 5
@@ -56,17 +60,76 @@ class Player(Character):
         if keys[pygame.K_s]:
             self.rect.y += 5
 
-    def check_character_interactions(self, events, game_constants):  
+    def check_character_interactions(self, events, game_constants=None):  # Accept optional game_constants
         for character in self.level.current_room.characters:
-            if isinstance(character, QuestCharacter):  # Check if it's a QuestCharacter
+            if isinstance(character, Safe):  # Prioritize Safe interaction
                 character.check_for_interaction(self, events)
-            if isinstance(character, Safe):  # Check if it's a SAfe
+            elif isinstance(character, QuestCharacter):
                 character.check_for_interaction(self, events)
-        
+            elif isinstance(character, kelCharacter):
+                if character.check_for_interaction(self, events, 1):  # Check if interaction occurred
+                    self.shared_data.talkk += 1
+                    if self.shared_data.dialogue == 0:  
+                        self.shared_data.dialogue = 1 
+
+            elif isinstance(character, usuCharacter):
+                if character.check_for_interaction(self, events, 2): 
+                    self.shared_data.talku += 1
+                    if self.shared_data.dialogue == 1:  
+                        self.shared_data.dialogue = 2  
+
     def check_enemy_collisions(self):
         for character in self.level.current_room.characters:
-            if isinstance(character, Enemy):  # Check if it's an Enemy
+            if isinstance(character, Enemy):
                 character.check_collision(self)
+
+class kelCharacter(Character):
+    def init(self, image_path, x, y, index, shared_data):  # Add shared_data parameter
+        super().init(image_path, x, y)
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                               self.rect.width + 100, self.rect.height + 100)
+        self.index = index  # Store the index for interaction checks
+        self.shared_data = shared_data  # Store the shared_data reference
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print("1")
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 1:
+                    self.shared_data.talkk += 1 
+                    print("uwu")
+                    return True
+
+class usuCharacter(Character):
+    def __init__(self, image_path, x, y, index):
+        super().__init__(image_path, x, y)
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                            self.rect.width + 100, self.rect.height + 100)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print(1)
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 2:
+                    self.shared_data.talku += 1 
+                    print("2")
+                    break
+
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
 
 class QuestCharacter(Character):
     def __init__(self, image_path, x, y, dialogue):
