@@ -1,4 +1,3 @@
-from .shareddata import SharedData
 import pygame, sys, random
 from pygame.locals import *
 from .constants import GameConstants
@@ -84,12 +83,12 @@ class Player(Character):
                 character.check_collision(self)
 
 class kelCharacter(Character):
-    def init(self, image_path, x, y, index, shared_data):  # Add shared_data parameter
-        super().init(image_path, x, y)
+    def __init__(self, image_path, x, y, index, shared_data):
+        super().__init__(image_path, x, y)  # Pass only the required arguments to the parent class
         self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
                                                self.rect.width + 100, self.rect.height + 100)
-        self.index = index  # Store the index for interaction checks
-        self.shared_data = shared_data  # Store the shared_data reference
+        self.index = index
+        self.shared_data = shared_data
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -107,10 +106,12 @@ class kelCharacter(Character):
                     return True
 
 class usuCharacter(Character):
-    def __init__(self, image_path, x, y, index):
-        super().__init__(image_path, x, y)
+    def __init__(self, image_path, x, y, index, shared_data):
+        super().__init__(image_path, x, y)  # Pass only the required arguments to the parent class
         self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
-                                            self.rect.width + 100, self.rect.height + 100)
+                                               self.rect.width + 100, self.rect.height + 100)
+        self.index = index
+        self.shared_data = shared_data
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

@@ -1,8 +1,8 @@
-import pygame
-import sys
-from src.characters import SharedData
+import pygame, sys, random
+from pygame.locals import *
+from src.constants import GameConstants
+from src.safe_game import main, terminate, checkForQuit, getStartingBoard, getBlankPosition, makeMove, isValidMove, getRandomMove, getLeftTopOfTile, getSpotClicked, drawTile, makeText, drawBoard, slideAnimation, generateNewPuzzle, resetAnimation  
 from src.safe_game import game_constants
-from src.characters import Player, Character, QuestCharacter, Enemy, Safe, kelCharacter, usuCharacter
 import textwrap
 from src.levels import Level, Wall, MainHall, LeftStairs, RightStairs, LeftCorridor, RightCorridor, IndependenceHall, Door
 from src.menu import Menu
@@ -24,13 +24,230 @@ shared_data = {
     "talku": 0
 }
 
+BLACK =         (  50,   50,   50)
+WHITE =         (255, 255, 255)
+BRIGHTBLUE =    (  0,  50, 255)
+GRAY =          (  122,  122,  122)
+BLUE =          (  112,  50, 255)
+PURPLE =         (  186, 85, 211)
+RED =           (255, 0, 0)
+UP = 'up'
+DOWN = 'down'
+LEFT = 'left'
+RIGHT = 'right'
+
 player_speed = 5
+
+class Character:
+    def __init__(self, image_path, x, y):
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+class Enemy(Character):
+    def __init__(self, image_paths, x, y):  # Pass a list of image paths
+        self.images = [pygame.image.load(path) for path in image_paths]
+        self.image_index = 0
+        self.image = self.images[self.image_index]
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.animation_timer = 0
+
+    def update(self):
+        self.animation_timer += 1
+        if self.animation_timer >= 10:  
+            self.animation_timer = 0
+            self.image_index = (self.image_index + 1) % len(self.images)
+            self.image = self.images[self.image_index]
+
+    def check_collision(self, player):
+        if self.rect.colliderect(player.rect):
+            print("Game Over!")  
+
+class Player(Character):
+    def __init__(self, x, y, level, shared_data):
+        super().__init__('data/images/mc.png', x, y)
+        self.level = level
+        self.shared_data = shared_data
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a]:
+            self.rect.x -= 5
+        if keys[pygame.K_d]:
+            self.rect.x += 5
+        if keys[pygame.K_w]:
+            self.rect.y -= 5
+        if keys[pygame.K_s]:
+            self.rect.y += 5
+
+    def check_character_interactions(self, events, game_constants=None):
+        for character in self.level.current_room.characters:
+            if isinstance(character, Safe):
+                character.check_for_interaction(self, events)
+            elif isinstance(character, kelCharacter):
+                if character.check_for_interaction(self, events, 1) and self.shared_data["talku"] >= 1:  
+                    self.shared_data["talkk"] += 1
+                    if self.shared_data["dialogue"] == 0:  
+                        self.shared_data["dialogue"] = 1
+
+            elif isinstance(character, usuCharacter):
+                if character.check_for_interaction(self, events, 2) and self.shared_data["talkk"] >= 1:  # Check talkk
+                    self.shared_data["talku"] += 1
+                    if self.shared_data["dialogue"] == 1:  
+                        self.shared_data["dialogue"] = 2
+
+    def check_enemy_collisions(self):
+        for character in self.level.current_room.characters:
+            if isinstance(character, Enemy):
+                character.check_collision(self)
+
+class kelCharacter(Character):
+    def __init__(self, image_path, x, y, index):
+        super().__init__(image_path, x, y)  # Pass only the required arguments to the parent class
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                               self.rect.width + 100, self.rect.height + 100)
+
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print("1")
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 1:
+                    global talkk
+                    talkk = talkk+1
+                    print("1")
+                    break
+
+class usuCharacter(Character):
+    def __init__(self, image_path, x, y, index):
+        super().__init__(image_path, x, y)  # Pass only the required arguments to the parent class
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                               self.rect.width + 100, self.rect.height + 100)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+    def interact(self):
+        print(1)
+
+    def check_for_interaction(self, player, events, index):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e and index == 2:
+                    global talku
+                    talku = talku + 1
+                    print("2")
+                    break
+
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+class Safe(Character):
+    def __init__(self, x, y, game_constants):
+        self.images = {
+            "closed": pygame.image.load(r"data\images\safe_clossed.png"),
+            "open": pygame.image.load(r"data\images\safe_opened.png"),
+            "empty": pygame.image.load(r"data\images\safe_empty.png")
+        }
+        self.state = "closed"
+        self.game_constants = game_constants
+        self.image = self.images[self.state]
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.interaction_zone = pygame.Rect(self.rect.x - 50, self.rect.y - 50, 
+                                            self.rect.width + 100, self.rect.height + 100)
+        
+
+    def check_for_interaction(self, player, events):
+        if self.interaction_zone.colliderect(player.rect):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    print("Interacting with Safe")
+                    if self.state == "closed":
+                        player_won = self.run_safe_minigame(player.level.current_room.screen) 
+                        if player_won:
+                            print("Player won the minigame!")
+                            self.state = "open"
+                            self.image = self.images[self.state]
+                    # Удалено лишнее условие
+                    elif self.state == "open":  # Изменено на elif
+                        print("now empty")
+                        self.state = "empty"
+                        self.image = self.images[self.state]
+                        break
+
+    def run_safe_minigame(self, screen):
+        mainBoard, solutionSeq = generateNewPuzzle(80, screen, self.game_constants)
+        SOLVEDBOARD = getStartingBoard()
+        allMoves = []
+        TEXT = PURPLE
+        BGCOLOR = GRAY
+        SOLVE_SURF, SOLVE_RECT = makeText('Solve', TEXT, BGCOLOR, 
+                                            1900 - 120, 1000 - 250)
+
+        while True:
+            slideTo = None
+            msg = 'Click tile or press arrow keys to slide.'
+            if mainBoard == SOLVEDBOARD:
+                return True  # Player won!
+
+            drawBoard(mainBoard, msg, screen, self.game_constants)
+            checkForQuit()
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    terminate()
+                elif event.type == MOUSEBUTTONUP:
+                    spotx, spoty = getSpotClicked(mainBoard, event.pos[0], event.pos[1])
+                    if (spotx, spoty) == (None, None):
+                        if SOLVE_RECT.collidepoint(event.pos):
+                            resetAnimation(mainBoard, solutionSeq + allMoves, screen, self.game_constants)  # Передаем screen и self.game_constants
+                            allMoves = []
+                    else:
+                        blankx, blanky = getBlankPosition(mainBoard)
+                        if spotx == blankx + 1 and spoty == blanky:
+                            slideTo = GameConstants.LEFT
+                        elif spotx == blankx - 1 and spoty == blanky:
+                            slideTo = GameConstants.RIGHT
+                        elif spotx == blankx and spoty == blanky + 1:
+                            slideTo = GameConstants.UP
+                        elif spotx == blankx and spoty == blanky - 1:
+                            slideTo = GameConstants.DOWN
+
+                elif event.type == KEYUP:
+                    if event.key in (K_LEFT, K_a) and isValidMove(mainBoard, LEFT):
+                        slideTo = LEFT
+                    elif event.key in (K_RIGHT, K_d) and isValidMove(mainBoard, RIGHT):
+                        slideTo = RIGHT
+                    elif event.key in (K_UP, K_w) and isValidMove(mainBoard, UP):
+                        slideTo = UP
+                    elif event.key in (K_DOWN, K_s) and isValidMove(mainBoard, DOWN):
+                        slideTo = DOWN
+
+            if slideTo:
+                slideAnimation(mainBoard, slideTo, 'Click tile or press arrow keys to slide.', 8, screen, self.game_constants)  # Передаем screen и self.game_constants
+                makeMove(mainBoard, slideTo)
+                allMoves.append(slideTo) 
+            pygame.display.update()
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        # pygame.draw.rect(screen, (0, 255, 0), self.interaction_zone, 2)
+
 
 #npc dialogs
 npc_list3 = [{
         'rect': pygame.Rect(150, 100, 50, 50),
         'dialog': ["Main character* - Hello, teacher!",
-                   "Practice teacher* - Hello, are you my student?вввввввввв?", 
+                   "Practice teacher* - Hello, are you my student??", 
                    "Main character* - Yes i am, i have missed a lot",
                    "Practice teacher* - I can see", 
                    "Practice teacher* - So what brought you here?", 
@@ -55,7 +272,11 @@ npc_list4 = [{
     }]
 npc_list1 = [{
         'rect': pygame.Rect(150, 100, 50, 50),
-        'dialog': ["HEllo"],
+        'dialog': ["**Vakes up", "*Opens eyes*", "*Yawn*", "Oh... Why is it so bright outside..?", 
+                   "Stop...", "*Realization*", "No, no, no... not again! I can't let this happen!",
+                   "WHERE IS MY PHONE?? WHAT TIME IS IT!!?", "*Time on the phone is 11:34.*", "OH MY GOD!!",
+                   "Now, I can only make it to the second lecture", "It is my 17th absence; I cannot skip anymore!!",
+                   "My last chance not to get F!!", "**Leaving ", "...",  "Time is 12:14 PM"],
         'background': 'data/dialogs/dormbackgroung.jpg',
         'image1': 'data/dialogs/MainCharacter.png', 
         'image2': 'data/dialogs/MCShock.PNG',
@@ -199,7 +420,6 @@ independence_hall.doors.append(door10)
 
 
 # Create Player
-shared_data = SharedData()
 player = Player(10, 10, level, shared_data) 
 player.rect.x = 442 
 player.rect.y = 449
@@ -211,7 +431,7 @@ right_corridor.characters.append(cleaner1)
 right_corridor.characters.append(cleaner2)
 
 # Create Quest Characters
-independence_hall_character = kelCharacter(r"data\images\Kelg.PNG", 929, 455, 1, shared_data)
+independence_hall_character = kelCharacter(r"data\images\Kelg.PNG", 929, 455, 1)
 left_corridor_character = usuCharacter(r"data\images\Usu.PNG", 1287, 126, 2)
 
 # Just some variables for further use
