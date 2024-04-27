@@ -67,20 +67,63 @@ class Enemy(Character):
 
 class Player(Character):
     def __init__(self, x, y, level, shared_data):
-        super().__init__('data/images/mc.png', x, y)
+        super().__init__('data\images\mc_downStay.PNG', x, y)
         self.level = level
         self.shared_data = shared_data
+        self.direction = DOWN  # Initial direction
+        self.anim_index = 0
+        self.anim_timer = 0
+        self.is_moving = False
+        self.walk_left = ["data\images\mc_left1.PNG", "data\images\mc_left2.PNG"]
+        self.walk_right = ["data\images\mc_right1.PNG", "data\images\mc_right2.PNG"]
+        self.walk_up = ["data\images\mc_up1.PNG", "data\images\mc_up2.PNG"]
+        self.walk_down = ["data\images\mc_down1.PNG", "data\images\mc_down2.PNG"]
 
     def update(self):
         keys = pygame.key.get_pressed()
+        self.is_moving = False  
+
         if keys[pygame.K_a]:
-            self.rect.x -= 5
-        if keys[pygame.K_d]:
-            self.rect.x += 5
-        if keys[pygame.K_w]:
-            self.rect.y -= 5
-        if keys[pygame.K_s]:
-            self.rect.y += 5
+            self.rect.x -= player_speed
+            self.direction = LEFT
+            self.is_moving = True
+        elif keys[pygame.K_d]:
+            self.rect.x += player_speed
+            self.direction = RIGHT
+            self.is_moving = True
+        elif keys[pygame.K_w]:
+            self.rect.y -= player_speed
+            self.direction = UP
+            self.is_moving = True
+        elif keys[pygame.K_s]:
+            self.rect.y += player_speed
+            self.direction = DOWN
+            self.is_moving = True
+
+        # Animation handling
+        if self.is_moving:
+            self.anim_timer += 1
+            if self.anim_timer >= 10:  # Adjust this value to control animation speed
+                self.anim_timer = 0
+                self.anim_index = (self.anim_index + 1) % 2  # Cycle between two sprites
+                if self.direction == LEFT:
+                    self.image = pygame.image.load(self.walk_left[self.anim_index])
+                elif self.direction == RIGHT:
+                    self.image = pygame.image.load(self.walk_right[self.anim_index])
+                elif self.direction == UP:
+                    self.image = pygame.image.load(self.walk_up[self.anim_index])
+                elif self.direction == DOWN:
+                    self.image = pygame.image.load(self.walk_down[self.anim_index])
+        else:
+            # Load static image based on direction
+            if self.direction == LEFT:
+                self.image = pygame.image.load("data\images\mc_leftStay.png")
+            if self.direction == RIGHT:
+                self.image = pygame.image.load("data\images\mc_rightStay.png")
+            if self.direction == UP:
+                self.image = pygame.image.load("data\images\mc_upStay.png")
+            if self.direction == DOWN:
+                self.image = pygame.image.load("data\images\mc_downStay.png")
 
     def check_character_interactions(self, events, game_constants=None):
         for character in self.level.current_room.characters:
