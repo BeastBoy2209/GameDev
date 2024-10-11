@@ -67,20 +67,68 @@ class Enemy(Character):
 
 class Player(Character):
     def __init__(self, x, y, level, shared_data):
-        super().__init__('data/images/mc.png', x, y)
+        super().__init__('data/images/mc_down.png', x, y)
         self.level = level
         self.shared_data = shared_data
+        # Load walking sprites for each direction
+        self.walk_up_sprites = [pygame.image.load("data/images/mc_up.PNG"), pygame.image.load("data/images/mc_up2.PNG")]
+        self.walk_down_sprites = [pygame.image.load("data/images/mc_down.PNG"), pygame.image.load("data/images/mc_down2.PNG")]
+        self.walk_left_sprites = [pygame.image.load("data/images/mc_left.PNG"), pygame.image.load("data/images/mc_left2.PNG")]
+        self.walk_right_sprites = [pygame.image.load("data/images/mc_right.PNG"), pygame.image.load("data/images/mc_right2.PNG")]
+
+        # Load idle sprite
+        self.idle_up_sprite = pygame.image.load("data\images\mc_upStay.PNG")
+        self.idle_down_sprite = pygame.image.load("data\images\mc_downStay.PNG")
+        self.idle_left_sprite = pygame.image.load("data\images\mc_leftStay.PNG")
+        self.idle_right_sprite = pygame.image.load("data\images\mc_rightStay.PNG")
+
+        # Initialize current sprite and animation variables
+        self.current_sprite = self.idle_sprite
+        self.animation_index = 0
+        self.animation_timer = 0
+        self.last_direction = None  # Track last walking direction
 
     def update(self):
         keys = pygame.key.get_pressed()
+        moving = False
+
         if keys[pygame.K_a]:
             self.rect.x -= 5
-        if keys[pygame.K_d]:
+            self.current_sprite = self.walk_left_sprites[self.animation_index]
+            self.last_direction = LEFT
+            moving = True
+        elif keys[pygame.K_d]:
             self.rect.x += 5
-        if keys[pygame.K_w]:
+            self.current_sprite = self.walk_right_sprites[self.animation_index]
+            self.last_direction = RIGHT
+            moving = True
+        elif keys[pygame.K_w]:
             self.rect.y -= 5
-        if keys[pygame.K_s]:
+            self.current_sprite = self.walk_up_sprites[self.animation_index]
+            self.last_direction = UP
+            moving = True
+        elif keys[pygame.K_s]:
             self.rect.y += 5
+            self.current_sprite = self.walk_down_sprites[self.animation_index]
+            self.last_direction = DOWN
+            moving = True
+
+        if not moving:
+            if self.last_direction == UP:
+                self.current_sprite = self.walk_up_sprites[0]  # Standing up sprite
+            elif self.last_direction == DOWN:
+                self.current_sprite = self.walk_down_sprites[0]  # Standing down sprite
+            elif self.last_direction == LEFT:
+                self.current_sprite = self.walk_left_sprites[0]  # Standing left sprite
+            elif self.last_direction == RIGHT:
+                self.current_sprite = self.walk_right_sprites[0]  # Standing right sprite
+            else:
+                self.current_sprite = self.idle_sprite
+            
+        self.animation_timer += 1
+        if self.animation_timer >= 10:
+            self.animation_timer = 0
+            self.animation_index = (self.animation_index + 1) % len(self.walk_up_sprites)
 
     def check_character_interactions(self, events, game_constants=None):
         for character in self.level.current_room.characters:
@@ -178,8 +226,7 @@ class Safe(Character):
                             print("Player won the minigame!")
                             self.state = "open"
                             self.image = self.images[self.state]
-                    # Удалено лишнее условие
-                    elif self.state == "open":  # Изменено на elif
+                    elif self.state == "open":  
                         print("now empty")
                         self.state = "empty"
                         self.image = self.images[self.state]
